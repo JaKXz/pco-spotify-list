@@ -112,11 +112,10 @@
               >Your browser doesn't support audio previews right now</audio
             >
           {:else if params.spotifyToken}
-            Couldn't find {song.title} by {song.author}, if needed please search
-            for and add it:
+            Replace {song.title} by {song.author}, if needed:
             <input type="text" />
           {:else}
-            {song.title} by {song.author}
+            {song.title} by {song.author}, last scheduled {song.last_scheduled_short_dates}
           {/if}
         </li>
       {/each}
@@ -129,6 +128,15 @@
   main {
     max-width: 240px;
     margin: 0 auto;
+  }
+
+  ul {
+    padding-inline-start: 0;
+  }
+
+  li {
+    list-style: none;
+    margin: 10px;
   }
 
   @media (min-width: 640px) {
