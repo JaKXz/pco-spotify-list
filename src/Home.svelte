@@ -34,17 +34,40 @@
       spotifyApi.setAccessToken(params.spotifyToken);
       spotifyTracks = (
         await Promise.all(
-          songs.data.map(({ title, author }) =>
-            spotifyApi.searchTracks(`${title}`, { limit: 1 })
-          )
+          songs.data.map(({ title, author }) => {
+            let artist = "";
+            if (
+              author?.includes("Ligertwood") ||
+              author?.includes("Reuben Morgan") ||
+              author?.includes("Aodhan King") ||
+              author?.includes("Houston")
+            ) {
+              artist = "Hillsong";
+            } else if (author?.includes("Steven Furtick")) {
+              artist = "Elevation Worship";
+            } else if (author?.includes("Aaron Moses")) {
+              artist = "Maverick City Music";
+            } else {
+              artist = author?.split(",")?.[0];
+            }
+            return spotifyApi.searchTracks(`${title} ${artist}`, { limit: 1 });
+          })
         )
       ).map(({ tracks }) => {
         if (tracks.items.length) {
-          const { external_urls, id, ...rest } = tracks.items[0];
+          const {
+            external_urls,
+            id,
+            album,
+            artists,
+            ...rest
+          } = tracks.items[0];
           return {
+            ...rest,
+            artist: artists[0].name,
             url: external_urls.spotify,
             id,
-            ...rest,
+            album: album.images[2],
           };
         }
       });
@@ -64,8 +87,25 @@
     <p>loading...</p>
   {:then _}
     <ul>
-      {#each songs.data as song}
-        <li>{song.title} by {song.author}</li>
+      {#each songs.data as song, index}
+        {#if spotifyTracks[index]}
+          <li>
+            <!--            <pre><code>{JSON.stringify(spotifyTracks[index], null, 2)}</code></pre>-->
+            <div>{spotifyTracks[index].artist} vs {song.author}</div>
+            <img
+              src={spotifyTracks[index].album.url}
+              height={spotifyTracks[index].album.height}
+              alt="{spotifyTracks[index].name} album art"
+            />
+            <a
+              href={spotifyTracks[index].url}
+              target="_blank"
+              rel="noreferrer noopener">{spotifyTracks[index].name}</a
+            >
+          </li>
+        {:else}
+          <li>{song.title} by {song.author}</li>
+        {/if}
       {/each}
     </ul>
   {/await}
@@ -74,19 +114,15 @@
 
 <style>
   main {
-    padding: 1em;
     max-width: 240px;
     margin: 0 auto;
   }
 
-  h1 {
-    color: #ff3e00;
-    text-transform: uppercase;
-    font-size: 4em;
-    font-weight: 100;
-  }
-
   @media (min-width: 640px) {
+    ul {
+      columns: 2;
+    }
+
     main {
       max-width: none;
     }
