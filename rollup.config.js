@@ -48,6 +48,12 @@ export default {
     replace({
       "process.env.PCO_APP_ID": JSON.stringify(process.env.PCO_APP_ID),
       "process.env.PCO_APP_SECRET": JSON.stringify(process.env.PCO_APP_SECRET),
+      "process.env.SPOTIFY_CLIENT_ID": JSON.stringify(
+        process.env.SPOTIFY_CLIENT_ID
+      ),
+      "process.env.SPOTIFY_CLIENT_SECRET": JSON.stringify(
+        process.env.SPOTIFY_CLIENT_SECRET
+      ),
     }),
     svelte({
       compilerOptions: {
