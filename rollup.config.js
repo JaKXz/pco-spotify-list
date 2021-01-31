@@ -1,11 +1,11 @@
-import svelte from "rollup-plugin-svelte";
+import dotenv from "dotenv";
 import css from "rollup-plugin-css-only";
+import livereload from "rollup-plugin-livereload";
+import svelte from "rollup-plugin-svelte";
 import { terser } from "rollup-plugin-terser";
 import commonjs from "@rollup/plugin-commonjs";
-import livereload from "rollup-plugin-livereload";
 import replace from "@rollup/plugin-replace";
 import resolve from "@rollup/plugin-node-resolve";
-import dotenv from "dotenv";
 
 dotenv.config();
 

@@ -9,9 +9,9 @@
     `http://${window.location.host}/callback`
   )}&scope=playlist-modify-public&response_type=token&state=123`;
   const spotifyApi = new SpotifyWebApi();
-  let spotifyUser = {};
-  let songs = {};
 
+  let spotifyUser;
+  let songs = {};
   let spotifyTracks = [];
   let selected = [];
 
@@ -47,7 +47,8 @@
               author.includes("Ligertwood") ||
               author.includes("Reuben Morgan") ||
               author.includes("Aodhan King") ||
-              author.includes("Houston")
+              author.includes("Houston") ||
+              author.includes("Marty Sampson")
             ) {
               artist = "Hillsong";
             } else if (author.includes("Steven Furtick")) {
@@ -57,35 +58,63 @@
             } else {
               artist = author.split(",")[0].split("and")[0];
             }
-            return spotifyApi.searchTracks(`${title} ${artist}`, { limit: 3 });
+            return spotifyApi.searchTracks(`${title} ${artist.trim()}`, {
+              limit: 3,
+            });
           })
         )
       ).map(({ tracks }) => {
         if (tracks.items.length) {
-          const {
-            external_urls,
-            id,
-            album,
-            artists,
-            ...rest
-          } = tracks.items[0];
+          const { external_urls, album, artists, ...rest } = tracks.items[0];
           return {
             ...rest,
             artist: artists[0].name,
             url: external_urls.spotify,
-            id,
             album: album.images[2],
           };
         }
       });
-      console.log(spotifyTracks);
+      selected = spotifyTracks.map((track) => track?.uri);
     }
+  }
+
+  let playlist;
+
+  async function createPlaylist() {
+    if (!spotifyUser || !params.spotifyToken) return;
+
+    const { id, external_urls } = await spotifyApi.createPlaylist(
+      spotifyUser.id,
+      {
+        name: "Active Songs",
+        description: "auto generated from the last ~50 scheduled songs on PCO",
+      }
+    );
+    await spotifyApi.addTracksToPlaylist(
+      id,
+      selected.filter(
+        (uri) => typeof uri === "string" && uri.includes("spotify:track:")
+      )
+    );
+    return external_urls.spotify;
   }
 </script>
 
 <main>
   {#if params.spotifyToken}
     <p>✅ Logged in to Spotify</p>
+    <button on:click={() => (playlist = createPlaylist())}
+      >Make the playlist!</button
+    >
+    {#if playlist}
+      {#await playlist}
+        <p style="color: pink">making playlist...</p>
+      {:then url}
+        <a href={url} target="_blank" rel="noreferrer noopener">{url}</a>
+      {:catch err}
+        <p style="color: red">something went wrong</p>
+      {/await}
+    {/if}
   {:else}
     <a href={spotifyAuthUrl}>Log in to Spotify</a>
     <br /><br />
@@ -96,8 +125,13 @@
     <ul>
       {#each songs.data as song, index}
         <li>
+          <input
+            type="checkbox"
+            checked={!!selected[index]}
+            bind:group={selected}
+            value={spotifyTracks[index]?.uri || index}
+          />
           {#if spotifyTracks[index]}
-            <div>{spotifyTracks[index].artist} vs {song.author}</div>
             <img
               src={spotifyTracks[index].album.url}
               height={spotifyTracks[index].album.height}
@@ -108,9 +142,11 @@
               target="_blank"
               rel="noreferrer noopener">{spotifyTracks[index].name}</a
             >
-            <audio controls src={spotifyTracks[index].preview_url}
-              >Your browser doesn't support audio previews right now</audio
-            >
+            {#if spotifyTracks[index].preview_url}
+              <audio controls src={spotifyTracks[index].preview_url}
+                >Your browser doesn't support audio previews right now</audio
+              >
+            {/if}
           {:else if params.spotifyToken}
             Replace {song.title} by {song.author}, if needed:
             <input type="text" />
