@@ -17,7 +17,7 @@
 
   async function getSongs() {
     songs = await fetch(
-      `https://api.planningcenteronline.com/services/v2/songs?order=-last_scheduled_at&offset=0&where[hidden]=false`,
+      `https://api.planningcenteronline.com/services/v2/songs?order=-last_scheduled_at&offset=0&where[hidden]=false&per_page=50`,
       {
         headers: new Headers({
           Authorization: `Basic ${btoa(
@@ -40,7 +40,7 @@
         await Promise.all(
           songs.data.map(({ title, author }) => {
             if (author == null) {
-              return spotifyApi.searchTracks(`${title}`, { limit: 2 });
+              return spotifyApi.searchTracks(`${title}`, { limit: 1 });
             }
             let artist = "";
             if (
@@ -55,7 +55,7 @@
             } else if (author.includes("Aaron Moses")) {
               artist = "Maverick City Music";
             } else {
-              artist = author.split(",")[0];
+              artist = author.split(",")[0].split("and")[0];
             }
             return spotifyApi.searchTracks(`${title} ${artist}`, { limit: 3 });
           })
