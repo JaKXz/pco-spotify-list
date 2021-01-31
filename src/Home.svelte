@@ -9,8 +9,11 @@
     `http://${window.location.host}/callback`
   )}&scope=playlist-modify-public&response_type=token&state=123`;
   const spotifyApi = new SpotifyWebApi();
+  let spotifyUser = {};
   let songs = {};
+
   let spotifyTracks = [];
+  let selected = [];
 
   async function getSongs() {
     songs = await fetch(
@@ -32,6 +35,7 @@
 
     if (params.spotifyToken) {
       spotifyApi.setAccessToken(params.spotifyToken);
+      spotifyUser = await spotifyApi.getMe();
       spotifyTracks = (
         await Promise.all(
           songs.data.map(({ title, author }) => {
