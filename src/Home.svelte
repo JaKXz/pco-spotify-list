@@ -14,7 +14,7 @@
 
   async function getSongs() {
     songs = await fetch(
-      `https://api.planningcenteronline.com/services/v2/songs?order=-last_scheduled_at&offset=0`,
+      `https://api.planningcenteronline.com/services/v2/songs?order=-last_scheduled_at&offset=0&where[hidden]=false`,
       {
         headers: new Headers({
           Authorization: `Basic ${btoa(
@@ -35,22 +35,25 @@
       spotifyTracks = (
         await Promise.all(
           songs.data.map(({ title, author }) => {
+            if (author == null) {
+              return spotifyApi.searchTracks(`${title}`, { limit: 2 });
+            }
             let artist = "";
             if (
-              author?.includes("Ligertwood") ||
-              author?.includes("Reuben Morgan") ||
-              author?.includes("Aodhan King") ||
-              author?.includes("Houston")
+              author.includes("Ligertwood") ||
+              author.includes("Reuben Morgan") ||
+              author.includes("Aodhan King") ||
+              author.includes("Houston")
             ) {
               artist = "Hillsong";
-            } else if (author?.includes("Steven Furtick")) {
-              artist = "Elevation Worship";
-            } else if (author?.includes("Aaron Moses")) {
+            } else if (author.includes("Steven Furtick")) {
+              artist = "Elevation";
+            } else if (author.includes("Aaron Moses")) {
               artist = "Maverick City Music";
             } else {
-              artist = author?.split(",")?.[0];
+              artist = author.split(",")[0];
             }
-            return spotifyApi.searchTracks(`${title} ${artist}`, { limit: 1 });
+            return spotifyApi.searchTracks(`${title} ${artist}`, { limit: 3 });
           })
         )
       ).map(({ tracks }) => {
@@ -88,9 +91,8 @@
   {:then _}
     <ul>
       {#each songs.data as song, index}
-        {#if spotifyTracks[index]}
-          <li>
-            <!--            <pre><code>{JSON.stringify(spotifyTracks[index], null, 2)}</code></pre>-->
+        <li>
+          {#if spotifyTracks[index]}
             <div>{spotifyTracks[index].artist} vs {song.author}</div>
             <img
               src={spotifyTracks[index].album.url}
@@ -102,10 +104,17 @@
               target="_blank"
               rel="noreferrer noopener">{spotifyTracks[index].name}</a
             >
-          </li>
-        {:else}
-          <li>{song.title} by {song.author}</li>
-        {/if}
+            <audio controls src={spotifyTracks[index].preview_url}
+              >Your browser doesn't support audio previews right now</audio
+            >
+          {:else if params.spotifyToken}
+            Couldn't find {song.title} by {song.author}, if needed please search
+            for and add it:
+            <input type="text" />
+          {:else}
+            {song.title} by {song.author}
+          {/if}
+        </li>
       {/each}
     </ul>
   {/await}
