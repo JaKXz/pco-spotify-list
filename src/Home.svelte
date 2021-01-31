@@ -3,6 +3,7 @@
 
   export let params;
 
+  const isTokenValid = new Date(params.spotifyTokenExpiry) > new Date();
   const spotifyAuthUrl = `https://accounts.spotify.com/authorize?client_id=${
     process.env.SPOTIFY_CLIENT_ID
   }&redirect_uri=${encodeURIComponent(
@@ -101,7 +102,7 @@
 </script>
 
 <main>
-  {#if params.spotifyToken}
+  {#if params.spotifyToken && isTokenValid}
     <p>✅ Logged in to Spotify</p>
     <button on:click={() => (playlist = createPlaylist())}
       >Make the playlist!</button

@@ -8,20 +8,31 @@
 
   router("/", () => {
     const spotifyToken = localStorage.getItem("spotifyToken");
-    if (spotifyToken) {
-      params = {
-        ...params,
-        spotifyToken,
-      };
+    let spotifyTokenExpiry = localStorage.getItem("spotifyTokenExpiry");
+    if (spotifyTokenExpiry == null) {
+      spotifyTokenExpiry = undefined;
+    } else {
+      spotifyTokenExpiry = Number(spotifyTokenExpiry);
     }
+    params = {
+      ...params,
+      spotifyToken,
+      spotifyTokenExpiry,
+    };
     page = Home;
   });
   router(
     "/callback",
     (ctx, next) => {
-      const { access_token: spotifyToken } = querystring.parse(ctx.hash);
+      const { access_token: spotifyToken, expires_in } = querystring.parse(
+        ctx.hash
+      );
       params = { ...params, ...ctx.params, spotifyToken };
       localStorage.setItem("spotifyToken", spotifyToken);
+      localStorage.setItem(
+        "spotifyTokenExpiry",
+        expires_in * 1000 + Date.now()
+      );
       next();
     },
     () => {
