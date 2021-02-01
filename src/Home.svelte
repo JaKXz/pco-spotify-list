@@ -1,15 +1,27 @@
 <script>
   import SpotifyWebApi from "spotify-web-api-js";
+  import { stringify } from "query-string";
 
   export let params;
 
-  const isTokenValid = new Date(params.spotifyTokenExpiry) > new Date();
-  const spotifyAuthUrl = `https://accounts.spotify.com/authorize?client_id=${
-    process.env.SPOTIFY_CLIENT_ID
-  }&redirect_uri=${encodeURIComponent(
-    `http://${window.location.host}/callback`
-  )}&scope=playlist-modify-public&response_type=token&state=123`;
+  const pcoApiUrl = `https://api.planningcenteronline.com/services/v2/songs`;
+  const pcoFetchOptions = {
+    headers: new Headers({
+      Authorization: `Basic ${btoa(
+        `${process.env.PCO_APP_ID}:${process.env.PCO_APP_SECRET}`
+      )}`,
+      "Content-Type": "application/json",
+    }),
+  };
+  const spotifyAuthUrl = `https://accounts.spotify.com/authorize?${stringify({
+    client_id: process.env.SPOTIFY_CLIENT_ID,
+    redirect_uri: `http://${window.location.host}/callback`,
+    response_type: "token",
+    scope: ["playlist-modify-public"],
+    state: "123",
+  })}`;
   const spotifyApi = new SpotifyWebApi();
+  const isTokenValid = new Date(params.spotifyTokenExpiry) > new Date();
 
   let spotifyUser;
   let songs = {};
@@ -18,23 +30,21 @@
 
   async function getSongs() {
     songs = await fetch(
-      `https://api.planningcenteronline.com/services/v2/songs?order=-last_scheduled_at&offset=0&where[hidden]=false&per_page=50`,
-      {
-        headers: new Headers({
-          Authorization: `Basic ${btoa(
-            `${process.env.PCO_APP_ID}:${process.env.PCO_APP_SECRET}`
-          )}`,
-          "Content-Type": "application/json",
-        }),
-      }
+      `${pcoApiUrl}?${stringify({
+        order: "-last_scheduled_at",
+        "where[hidden]": false,
+        per_page: 50,
+        include: "Arrangement",
+      })}`,
+      pcoFetchOptions
     )
       .then((response) => response.json())
-      .then(({ data, meta }) => ({
+      .then(({ data, ...rest }) => ({
         data: data.map(({ attributes }) => attributes),
-        meta,
+        ...rest,
       }));
 
-    if (params.spotifyToken) {
+    if (params.spotifyToken && isTokenValid) {
       spotifyApi.setAccessToken(params.spotifyToken);
       spotifyUser = await spotifyApi.getMe();
       spotifyTracks = (
@@ -158,7 +168,9 @@
       {/each}
     </ul>
   {/await}
-  <div>{JSON.stringify(songs.meta, null, 2)}</div>
+  <div>
+    <pre><code>{JSON.stringify({...songs, data: null}, null, 2)}</code></pre>
+  </div>
 </main>
 
 <style>

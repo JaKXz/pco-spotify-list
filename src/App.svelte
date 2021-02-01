@@ -1,18 +1,19 @@
 <script>
   import router from "page";
-  import querystring from "query-string";
+  import { parse } from "query-string";
   import Home from "./Home.svelte";
 
   let page;
   let params = {};
 
   router("/", () => {
-    const spotifyToken = localStorage.getItem("spotifyToken");
+    let spotifyToken = localStorage.getItem("spotifyToken");
     let spotifyTokenExpiry = localStorage.getItem("spotifyTokenExpiry");
     if (spotifyTokenExpiry == null) {
       spotifyTokenExpiry = undefined;
     } else {
       spotifyTokenExpiry = Number(spotifyTokenExpiry);
+      if (new Date(spotifyTokenExpiry) < new Date()) spotifyToken = undefined;
     }
     params = {
       ...params,
@@ -24,9 +25,7 @@
   router(
     "/callback",
     (ctx, next) => {
-      const { access_token: spotifyToken, expires_in } = querystring.parse(
-        ctx.hash
-      );
+      const { access_token: spotifyToken, expires_in } = parse(ctx.hash);
       params = { ...params, ...ctx.params, spotifyToken };
       localStorage.setItem("spotifyToken", spotifyToken);
       localStorage.setItem(
