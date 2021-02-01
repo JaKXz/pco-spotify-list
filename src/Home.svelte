@@ -1,6 +1,7 @@
 <script>
   import SpotifyWebApi from "spotify-web-api-js";
   import { stringify } from "query-string";
+  import Search from "svelte-search";
 
   export let params;
 
@@ -21,7 +22,8 @@
     state: "123",
   })}`;
   const spotifyApi = new SpotifyWebApi();
-  const isTokenValid = new Date(params.spotifyTokenExpiry) > new Date();
+  const isTokenValid =
+    !!params.spotifyToken && new Date(params.spotifyTokenExpiry) > new Date();
 
   let spotifyUser;
   let songs = {};
@@ -44,7 +46,7 @@
         ...rest,
       }));
 
-    if (params.spotifyToken && isTokenValid) {
+    if (isTokenValid) {
       spotifyApi.setAccessToken(params.spotifyToken);
       spotifyUser = await spotifyApi.getMe();
       spotifyTracks = (
@@ -70,7 +72,7 @@
               artist = author.split(",")[0].split("and")[0];
             }
             return spotifyApi.searchTracks(`${title} ${artist.trim()}`, {
-              limit: 3,
+              limit: 1,
             });
           })
         )
@@ -81,7 +83,7 @@
             ...rest,
             artist: artists[0].name,
             url: external_urls.spotify,
-            album: album.images[2],
+            album: { ...album.images[2], ...album },
           };
         }
       });
@@ -92,7 +94,7 @@
   let playlist;
 
   async function createPlaylist() {
-    if (!spotifyUser || !params.spotifyToken) return;
+    if (!spotifyUser || !isTokenValid) return;
 
     const { id, external_urls } = await spotifyApi.createPlaylist(
       spotifyUser.id,
@@ -109,10 +111,39 @@
     );
     return external_urls.spotify;
   }
+
+  function removeSpotifyTrack({ event, index }) {
+    if (spotifyTracks[index] && event.target.checked === false) {
+      spotifyTracks[index] = null;
+    }
+  }
+
+  let newRecordings = {};
+  let newSearch;
+  function findNewRecordings({ query, index }) {
+    if (newSearch != null) {
+      newSearch.abort();
+    }
+    if (query.trim() !== "") {
+      newSearch = spotifyApi.searchTracks(query, { limit: 5 });
+      newSearch
+        .then(({ tracks }) => {
+          newRecordings[index] = tracks.items.map(
+            ({ external_urls, album, artists, ...rest }) => ({
+              ...rest,
+              artist: artists[0].name,
+              url: external_urls.spotify,
+              album: { ...album.images[2], ...album },
+            })
+          );
+        })
+        .catch((err) => console.error(err));
+    }
+  }
 </script>
 
 <main>
-  {#if params.spotifyToken && isTokenValid}
+  {#if isTokenValid}
     <p>✅ Logged in to Spotify</p>
     <button on:click={() => (playlist = createPlaylist())}
       >Make the playlist!</button
@@ -137,6 +168,7 @@
       {#each songs.data as song, index}
         <li>
           <input
+            on:change={(event) => removeSpotifyTrack({ event, index })}
             type="checkbox"
             checked={!!selected[index]}
             bind:group={selected}
@@ -146,21 +178,51 @@
             <img
               src={spotifyTracks[index].album.url}
               height={spotifyTracks[index].album.height}
-              alt="{spotifyTracks[index].name} album art"
+              alt={spotifyTracks[index].album.name}
             />
             <a
               href={spotifyTracks[index].url}
               target="_blank"
               rel="noreferrer noopener">{spotifyTracks[index].name}</a
             >
+            from {spotifyTracks[index].album.name}
             {#if spotifyTracks[index].preview_url}
               <audio controls src={spotifyTracks[index].preview_url}
-                >Your browser doesn't support audio previews right now</audio
+                ><track kind="captions" /></audio
               >
             {/if}
-          {:else if params.spotifyToken}
-            Replace {song.title} by {song.author}, if needed:
-            <input type="text" />
+          {:else if isTokenValid}
+            <Search
+              label="Replace {song.title} by {song.author}, if needed:"
+              debounce={250}
+              on:type={(e) => findNewRecordings({ query: e.detail, index })}
+              on:clear={() => (newRecordings[index] = [])}
+            />
+            {#if newRecordings[index]?.length}
+              {#each newRecordings[index] as alternate}
+                <input
+                  type="checkbox"
+                  bind:group={selected}
+                  value={alternate.uri}
+                />
+                <img
+                  src={alternate.album.url}
+                  height={alternate.album.height}
+                  alt={alternate.album.name}
+                />
+                <a
+                  href={alternate.url}
+                  target="_blank"
+                  rel="noreferrer noopener">{alternate.name}</a
+                >
+                from {alternate.album.name}
+                {#if alternate.preview_url}
+                  <audio controls src={alternate.preview_url}
+                    ><track kind="captions" /></audio
+                  >
+                {/if}
+              {/each}
+            {/if}
           {:else}
             {song.title} by {song.author}, last scheduled {song.last_scheduled_short_dates}
           {/if}
@@ -189,10 +251,6 @@
   }
 
   @media (min-width: 640px) {
-    ul {
-      columns: 2;
-    }
-
     main {
       max-width: none;
     }

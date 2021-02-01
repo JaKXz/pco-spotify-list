@@ -26,7 +26,8 @@
     "page": "^1.11.6",
     "query-string": "^6.13.8",
     "sirv-cli": "^1.0.0",
-    "spotify-web-api-js": "^1.5.1"
+    "spotify-web-api-js": "^1.5.1",
+    "svelte-search": "^1.0.0"
   },
   "husky": {
     "hooks": {
