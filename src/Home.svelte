@@ -2,6 +2,7 @@
   import SpotifyWebApi from "spotify-web-api-js";
   import { stringify } from "query-string";
   import Search from "svelte-search";
+  import Track from "./Track.svelte";
 
   export let params;
 
@@ -57,6 +58,7 @@
             }
             let artist = "";
             if (
+              author.includes("Brooke Fraser") ||
               author.includes("Ligertwood") ||
               author.includes("Reuben Morgan") ||
               author.includes("Aodhan King") ||
@@ -83,7 +85,7 @@
             ...rest,
             artist: artists[0].name,
             url: external_urls.spotify,
-            album: { ...album.images[2], ...album },
+            album: { ...album.images[1], ...album },
           };
         }
       });
@@ -115,6 +117,7 @@
   function removeSpotifyTrack({ event, index }) {
     if (spotifyTracks[index] && event.target.checked === false) {
       spotifyTracks[index] = null;
+      selected[index] = null;
     }
   }
 
@@ -167,61 +170,35 @@
     <ul>
       {#each songs.data as song, index}
         <li>
-          <input
-            on:change={(event) => removeSpotifyTrack({ event, index })}
-            type="checkbox"
-            checked={!!selected[index]}
-            bind:group={selected}
-            value={spotifyTracks[index]?.uri || index}
-          />
           {#if spotifyTracks[index]}
-            <img
-              src={spotifyTracks[index].album.url}
-              height={spotifyTracks[index].album.height}
-              alt={spotifyTracks[index].album.name}
-            />
-            <a
-              href={spotifyTracks[index].url}
-              target="_blank"
-              rel="noreferrer noopener">{spotifyTracks[index].name}</a
-            >
-            from {spotifyTracks[index].album.name}
-            {#if spotifyTracks[index].preview_url}
-              <audio controls src={spotifyTracks[index].preview_url}
-                ><track kind="captions" /></audio
-              >
-            {/if}
+            <label class="list-label">
+              <input
+                on:change={(event) => removeSpotifyTrack({ event, index })}
+                type="checkbox"
+                checked={!!selected[index]}
+                bind:group={selected}
+                value={spotifyTracks[index].uri}
+              />
+              <Track item={spotifyTracks[index]} />
+            </label>
           {:else if isTokenValid}
             <Search
               label="Replace {song.title} by {song.author}, if needed:"
               debounce={250}
               on:type={(e) => findNewRecordings({ query: e.detail, index })}
-              on:clear={() => (newRecordings[index] = [])}
             />
             {#if newRecordings[index]?.length}
-              {#each newRecordings[index] as alternate}
-                <input
-                  type="checkbox"
-                  bind:group={selected}
-                  value={alternate.uri}
-                />
-                <img
-                  src={alternate.album.url}
-                  height={alternate.album.height}
-                  alt={alternate.album.name}
-                />
-                <a
-                  href={alternate.url}
-                  target="_blank"
-                  rel="noreferrer noopener">{alternate.name}</a
-                >
-                from {alternate.album.name}
-                {#if alternate.preview_url}
-                  <audio controls src={alternate.preview_url}
-                    ><track kind="captions" /></audio
-                  >
-                {/if}
-              {/each}
+              <div style="margin-bottom: 20px">
+                {#each newRecordings[index] as alternate}
+                  <Track item={alternate}>
+                    <input
+                      type="checkbox"
+                      bind:group={selected}
+                      value={alternate.uri}
+                    />
+                  </Track>
+                {/each}
+              </div>
             {/if}
           {:else}
             {song.title} by {song.author}, last scheduled {song.last_scheduled_short_dates}
@@ -230,14 +207,10 @@
       {/each}
     </ul>
   {/await}
-  <div>
-    <pre><code>{JSON.stringify({...songs, data: null}, null, 2)}</code></pre>
-  </div>
 </main>
 
 <style>
   main {
-    max-width: 240px;
     margin: 0 auto;
   }
 
@@ -246,13 +219,25 @@
   }
 
   li {
+    vertical-align: middle;
     list-style: none;
     margin: 10px;
   }
 
+  .list-label {
+    display: flex;
+    justify-content: flex-start;
+    align-items: baseline;
+  }
+
   @media (min-width: 640px) {
     main {
-      max-width: none;
+      max-width: 1000px;
+    }
+    input[type="checkbox"] {
+      display: inline;
+      transform: scale(3);
+      margin-right: 10px;
     }
   }
 </style>

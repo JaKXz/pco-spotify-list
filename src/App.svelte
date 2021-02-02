@@ -22,22 +22,13 @@
     };
     page = Home;
   });
-  router(
-    "/callback",
-    (ctx, next) => {
-      const { access_token: spotifyToken, expires_in } = parse(ctx.hash);
-      params = { ...params, ...ctx.params, spotifyToken };
-      localStorage.setItem("spotifyToken", spotifyToken);
-      localStorage.setItem(
-        "spotifyTokenExpiry",
-        expires_in * 1000 + Date.now()
-      );
-      next();
-    },
-    () => {
-      router.redirect("/");
-    }
-  );
+  router("/callback", (ctx, _next) => {
+    const { access_token: spotifyToken, expires_in } = parse(ctx.hash);
+    params = { ...params, ...ctx.params, spotifyToken };
+    localStorage.setItem("spotifyToken", spotifyToken);
+    localStorage.setItem("spotifyTokenExpiry", expires_in * 1000 + Date.now());
+    router.redirect("/");
+  });
 
   router.start();
 </script>
