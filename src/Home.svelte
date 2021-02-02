@@ -36,14 +36,61 @@
       `${pcoApiUrl}?${stringify({
         order: "-last_scheduled_at",
         "where[hidden]": false,
-        per_page: 50,
-        include: "Arrangement",
+        per_page: 75,
       })}`,
       pcoFetchOptions
     )
       .then((response) => response.json())
-      .then(({ data, ...rest }) => ({
-        data: data.map(({ attributes }) => attributes),
+      .then(async ({ data, ...rest }) => ({
+        data: (
+          await Promise.all(
+            data
+              .filter(
+                ({ attributes }, index, array) =>
+                  !attributes.title.toLowerCase().includes("christmas") &&
+                  array.findIndex(
+                    (el) => el.attributes.title === attributes.title
+                  ) === index
+              )
+              .map(async ({ attributes, id }) => {
+                const controller = new AbortController();
+                let timeoutInFlight;
+
+                const schedules = await Promise.race([
+                  fetch(
+                    `${pcoApiUrl}/${id}/song_schedules?${stringify({
+                      filter: "before",
+                      before: new Date().toISOString(),
+                      per_page: 5,
+                      order: "-plan_sort_date",
+                    })}`,
+                    { ...pcoFetchOptions, signal: controller.signal }
+                  ).then((res) => res.json()),
+                  new Promise((resolve) => {
+                    timeoutInFlight = setTimeout(() => {
+                      resolve({ meta: { total_count: 2 }, data: [] });
+                      controller.abort();
+                    }, 999);
+                  }),
+                ]);
+
+                clearTimeout(timeoutInFlight);
+                return { ...attributes, schedules, id };
+              })
+          )
+        ).filter(
+          ({ schedules }) =>
+            schedules.meta.total_count > 1 &&
+            schedules.data.some(({ attributes }) =>
+              attributes.service_type_name.toLowerCase().includes("downtown")
+            ) &&
+            schedules.data.every(
+              ({ attributes }) =>
+                !attributes.service_type_name
+                  .toLowerCase()
+                  .includes("christmas")
+            )
+        ),
         ...rest,
       }));
 
@@ -63,13 +110,29 @@
               author.includes("Reuben Morgan") ||
               author.includes("Aodhan King") ||
               author.includes("Houston") ||
-              author.includes("Marty Sampson")
+              author.includes("Marty Sampson") ||
+              author.includes("Benjamin Hastings")
             ) {
               artist = "Hillsong";
             } else if (author.includes("Steven Furtick")) {
               artist = "Elevation";
+            } else if (author.includes("Kari Jobe")) {
+              artist = "Kari Jobe";
             } else if (author.includes("Aaron Moses")) {
               artist = "Maverick City Music";
+            } else if (author.includes("Nate Moore")) {
+              artist = "Housefires";
+            } else if (author.includes("Mia Fieldes")) {
+              artist = "Vertical";
+            } else if (author.includes("Leslie Jordan")) {
+              artist = "All Sons";
+            } else if (author.includes("Cory Asbury")) {
+              artist = "Cory Asbury";
+            } else if (
+              author.includes("McClure") ||
+              author.includes("Helser")
+            ) {
+              artist = "Bethel";
             } else {
               artist = author.split(",")[0].split("and")[0];
             }
@@ -173,19 +236,21 @@
     <p>loading...</p>
   {:then _}
     <ul>
-      {#each songs.data as song, index}
-        <li style="--my:10px; --lis:none">
+      {#each songs.data as song, index (song.id)}
+        <li
+          style="--my:10px; --lis:none; --d:flex; --ai:baseline; --jc:flex-start"
+        >
           {#if spotifyTracks[index]}
-            <label style="--d:flex; --ai:baseline; --jc:flex-start">
-              <input
-                on:change={(event) => removeSpotifyTrack({ event, index })}
-                type="checkbox"
-                checked={!!selected[index]}
-                bind:group={selected}
-                value={spotifyTracks[index].uri}
-              />
-              <Track item={spotifyTracks[index]} />
-            </label>
+            <Track item={{ ...song, ...spotifyTracks[index] }} />
+            <div style="--fg:1" />
+            <input
+              on:change={(event) => removeSpotifyTrack({ event, index })}
+              type="checkbox"
+              checked={!!selected[index]}
+              bind:group={selected}
+              value={spotifyTracks[index].uri}
+              style="--t:scale(3)"
+            />
           {:else if isTokenValid}
             <Search
               label="Replace {song.title} by {song.author}, if needed:"
@@ -195,12 +260,12 @@
             {#if newRecordings[index]?.length}
               <div>
                 {#each newRecordings[index] as alternate}
-                  <Track item={alternate}>
+                  <Track item={{ ...song, ...alternate }}>
                     <input
                       type="checkbox"
                       bind:group={selected}
                       value={alternate.uri}
-                      style="--mr:20px"
+                      style="--mr:20px; --t:scale(3)"
                     />
                   </Track>
                 {/each}
@@ -226,11 +291,7 @@
 
   @media (min-width: 640px) {
     main {
-      max-width: 1000px;
-    }
-    input[type="checkbox"] {
-      margin-left: 2.8px;
-      transform: scale(1.5);
+      max-width: 800px;
     }
   }
 </style>

@@ -5,7 +5,7 @@
 <details style="--m:10px">
   <summary>
     <a href={item.url} target="_blank" rel="noreferrer noopener">{item.name}</a>
-    from {item.album.name}
+    from {item.album.name}, last scheduled {item.last_scheduled_short_dates}
   </summary>
   <div style="--d:flex; --ai:center">
     <slot />
