@@ -2,8 +2,8 @@
   export let item;
 </script>
 
-<details>
-  <summary style="--m:10px">
+<details style="--m:10px">
+  <summary>
     <a href={item.url} target="_blank" rel="noreferrer noopener">{item.name}</a>
     from {item.album.name}
   </summary>

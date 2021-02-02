@@ -155,7 +155,12 @@
       {#await playlist}
         <p style="color: pink">making playlist...</p>
       {:then url}
-        <a href={url} target="_blank" rel="noreferrer noopener">{url}</a>
+        <a
+          style="--d:block"
+          href={url}
+          target="_blank"
+          rel="noreferrer noopener">{url}</a
+        >
       {:catch err}
         <p style="color: red">something went wrong</p>
       {/await}
@@ -169,7 +174,7 @@
   {:then _}
     <ul>
       {#each songs.data as song, index}
-        <li style="--m:10px; --lis:none">
+        <li style="--my:10px; --lis:none">
           {#if spotifyTracks[index]}
             <label style="--d:flex; --ai:baseline; --jc:flex-start">
               <input
@@ -178,7 +183,6 @@
                 checked={!!selected[index]}
                 bind:group={selected}
                 value={spotifyTracks[index].uri}
-                style="--d:inline; --mr:10px"
               />
               <Track item={spotifyTracks[index]} />
             </label>
@@ -225,7 +229,8 @@
       max-width: 1000px;
     }
     input[type="checkbox"] {
-      transform: scale(3);
+      margin-left: 2.8px;
+      transform: scale(1.5);
     }
   }
 </style>
