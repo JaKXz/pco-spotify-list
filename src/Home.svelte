@@ -169,15 +169,16 @@
   {:then _}
     <ul>
       {#each songs.data as song, index}
-        <li>
+        <li style="--m:10px; --lis:none">
           {#if spotifyTracks[index]}
-            <label class="list-label">
+            <label style="--d:flex; --ai:baseline; --jc:flex-start">
               <input
                 on:change={(event) => removeSpotifyTrack({ event, index })}
                 type="checkbox"
                 checked={!!selected[index]}
                 bind:group={selected}
                 value={spotifyTracks[index].uri}
+                style="--d:inline; --mr:10px"
               />
               <Track item={spotifyTracks[index]} />
             </label>
@@ -188,13 +189,14 @@
               on:type={(e) => findNewRecordings({ query: e.detail, index })}
             />
             {#if newRecordings[index]?.length}
-              <div style="margin-bottom: 20px">
+              <div>
                 {#each newRecordings[index] as alternate}
                   <Track item={alternate}>
                     <input
                       type="checkbox"
                       bind:group={selected}
                       value={alternate.uri}
+                      style="--mr:20px"
                     />
                   </Track>
                 {/each}
@@ -218,26 +220,12 @@
     padding-inline-start: 0;
   }
 
-  li {
-    vertical-align: middle;
-    list-style: none;
-    margin: 10px;
-  }
-
-  .list-label {
-    display: flex;
-    justify-content: flex-start;
-    align-items: baseline;
-  }
-
   @media (min-width: 640px) {
     main {
       max-width: 1000px;
     }
     input[type="checkbox"] {
-      display: inline;
       transform: scale(3);
-      margin-right: 10px;
     }
   }
 </style>

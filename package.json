@@ -23,6 +23,7 @@
     "svelte": "^3.0.0"
   },
   "dependencies": {
+    "bonsai.css": "^1.2.2",
     "page": "^1.11.6",
     "query-string": "^6.13.8",
     "sirv-cli": "^1.0.0",

@@ -1,4 +1,7 @@
 <script>
+  import "bonsai.css/dist/bonsai-helpers.min.css";
+  import "bonsai.css/dist/bonsai-utilities.min.css";
+
   import router from "page";
   import { parse } from "query-string";
   import Home from "./Home.svelte";
