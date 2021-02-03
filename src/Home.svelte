@@ -209,7 +209,7 @@
     {#if isTokenValid}
       <div style="--d:flex; --ai:center">
         <p style="--d:inline-block; --m:0">
-          ✅&nbsp;&nbsp; Logged in to Spotify
+          ✅&nbsp;&nbsp;Logged in to Spotify
         </p>
         <button
           style="--d:inline-block; --ml:auto; --my:0"
@@ -242,7 +242,7 @@
     <ul>
       {#each songs.data as song, index (song.id)}
         <li
-          style="--my:1rem; --lis:none; --d:flex; --ai:baseline; --jc:flex-start"
+          style="--my:1rem; --lis:none; --d:flex; --ai:baseline; --jc:space-between"
         >
           {#if spotifyTracks[index]}
             <Track item={{ ...song, ...spotifyTracks[index] }} />
@@ -256,16 +256,17 @@
               style="--t:scale(1.5)"
             />
           {:else if isTokenValid}
-            <Search
-              label="Replace {song.title} by {song.author}, if needed:"
-              debounce={250}
-              on:type={(e) =>
-                findNewRecordings({ query: e.detail, id: song.id })}
-              style="--maxw:calc(var(--app-width) * 0.75)"
-            />
+            <div style="--px:12px; --maxw:40%">
+              <Search
+                label="Replace {song.title} by {song.author}, if needed:"
+                debounce={250}
+                on:type={(e) =>
+                  findNewRecordings({ query: e.detail, id: song.id })}
+              />
+            </div>
             {#if newSearch[song.id]}
               {#await newSearch[song.id] then spotifyResults}
-                <div style="--as:flex-end">
+                <div style="--pl:12px">
                   {#each spotifyResults.tracks.items as alternate}
                     <Track
                       item={{
@@ -280,7 +281,7 @@
                         type="checkbox"
                         bind:group={selected}
                         value={alternate.uri}
-                        style="--mr:1rem; --t:scale(1.5)"
+                        style="--t:scale(1.5)"
                       />
                     </Track>
                   {/each}
