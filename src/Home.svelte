@@ -209,7 +209,7 @@
 </script>
 
 <main>
-  <div class="accent" style="--p:20px">
+  <div class="accent" style="--p:2rem">
     <h3 style="--weight:600">📒 pco spotify list ✨</h3>
     {#if isTokenValid}
       <div style="--d:flex; --ai:center">
@@ -247,7 +247,7 @@
     <ul>
       {#each songs.data as song, index (song.id)}
         <li
-          style="--my:10px; --lis:none; --d:flex; --ai:baseline; --jc:flex-start"
+          style="--my:1rem; --lis:none; --d:flex; --ai:baseline; --jc:flex-start"
         >
           {#if spotifyTracks[index]}
             <Track item={{ ...song, ...spotifyTracks[index] }} />
@@ -265,7 +265,7 @@
               label="Replace {song.title} by {song.author}, if needed:"
               debounce={250}
               on:type={(e) => findNewRecordings({ query: e.detail, index })}
-              style="--w:calc(0.75 * 800px)"
+              style="--maxw:calc(var(--max-width) * 0.75)"
             />
             {#if newRecordings[index]?.length}
               <div>
@@ -275,7 +275,7 @@
                       type="checkbox"
                       bind:group={selected}
                       value={alternate.uri}
-                      style="--mr:20px; --t:scale(1.5)"
+                      style="--mr:1rem; --t:scale(1.5)"
                     />
                   </Track>
                 {/each}
@@ -311,8 +311,11 @@
   }
 
   @media (min-width: 640px) {
+    :root {
+      --max-width: 800px;
+    }
     main {
-      max-width: 800px;
+      max-width: var(--max-width);
     }
   }
 </style>
