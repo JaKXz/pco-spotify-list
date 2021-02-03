@@ -52,7 +52,9 @@
                   new Date(attributes.last_scheduled_at) >
                     addMonths(new Date(), -6) &&
                   array.findIndex(
-                    (el) => el.attributes.title === attributes.title
+                    (el) =>
+                      el.attributes.title.toLowerCase() ===
+                      attributes.title.toLowerCase()
                   ) === index
               )
               .map(async ({ attributes, id }) => {
@@ -83,10 +85,10 @@
           )
         ).filter(
           ({ schedules }) =>
-            schedules.data.some(({ attributes }) =>
-              attributes.service_type_name.toLowerCase().includes("downtown")
-            ) &&
             schedules.meta?.total_count > 1 &&
+            // schedules.data.some(({ attributes }) =>
+            //   attributes.service_type_name.toLowerCase().includes("downtown")
+            // ) &&
             schedules.data.every(
               ({ attributes }) =>
                 !attributes.service_type_name
@@ -149,9 +151,12 @@
           const { external_urls, album, artists, ...rest } = tracks.items[0];
           return {
             ...rest,
+            external_urls,
+            artists,
             artist: artists[0].name,
             url: external_urls.spotify,
-            album: { ...album.images[1], ...album },
+            album,
+            albumImg: album.images[1],
           };
         }
       });
@@ -187,26 +192,13 @@
     }
   }
 
-  let newRecordings = {};
-  let newSearch;
-  function findNewRecordings({ query, index }) {
-    if (newSearch != null) {
-      newSearch.abort();
+  let newSearch = {};
+  function findNewRecordings({ query, id }) {
+    if (newSearch[id] != null) {
+      newSearch[id].abort();
     }
     if (query.trim() !== "") {
-      newSearch = spotifyApi.searchTracks(query, { limit: 5 });
-      newSearch
-        .then(({ tracks }) => {
-          newRecordings[index] = tracks.items.map(
-            ({ external_urls, album, artists, ...rest }) => ({
-              ...rest,
-              artist: artists[0].name,
-              url: external_urls.spotify,
-              album: { ...album.images[2], ...album },
-            })
-          );
-        })
-        .catch((err) => console.error(err));
+      newSearch[id] = spotifyApi.searchTracks(query, { limit: 5 });
     }
   }
 </script>
@@ -250,7 +242,7 @@
     <ul>
       {#each songs.data as song, index (song.id)}
         <li
-          style="--my:1rem; --lis:none; --d:flex; --ai:baseline; --jc:flex-start; --fw:wrap"
+          style="--my:1rem; --lis:none; --d:flex; --ai:baseline; --jc:flex-start"
         >
           {#if spotifyTracks[index]}
             <Track item={{ ...song, ...spotifyTracks[index] }} />
@@ -267,22 +259,33 @@
             <Search
               label="Replace {song.title} by {song.author}, if needed:"
               debounce={250}
-              on:type={(e) => findNewRecordings({ query: e.detail, index })}
-              style="--maxw:calc(var(--max-width) * 0.75)"
+              on:type={(e) =>
+                findNewRecordings({ query: e.detail, id: song.id })}
+              style="--maxw:calc(var(--app-width) * 0.75)"
             />
-            {#if newRecordings[index]?.length}
-              <div>
-                {#each newRecordings[index] as alternate}
-                  <Track item={{ ...song, ...alternate }}>
-                    <input
-                      type="checkbox"
-                      bind:group={selected}
-                      value={alternate.uri}
-                      style="--mr:1rem; --t:scale(1.5)"
-                    />
-                  </Track>
-                {/each}
-              </div>
+            {#if newSearch[song.id]}
+              {#await newSearch[song.id] then spotifyResults}
+                <div style="--as:flex-end">
+                  {#each spotifyResults.tracks.items as alternate}
+                    <Track
+                      item={{
+                        ...song,
+                        ...alternate,
+                        url: alternate.external_urls.spotify,
+                        artist: alternate.artists[0].name,
+                        albumImg: alternate.album.images[2],
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        bind:group={selected}
+                        value={alternate.uri}
+                        style="--mr:1rem; --t:scale(1.5)"
+                      />
+                    </Track>
+                  {/each}
+                </div>
+              {/await}
             {/if}
           {:else}
             {song.title} by {song.author}, last scheduled {song.last_scheduled_short_dates}
@@ -319,10 +322,10 @@
 
   @media (min-width: 640px) {
     :root {
-      --max-width: 800px;
+      --app-width: 800px;
     }
     main {
-      max-width: var(--max-width);
+      max-width: var(--app-width);
     }
   }
 </style>
