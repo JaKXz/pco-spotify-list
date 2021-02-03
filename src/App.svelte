@@ -1,6 +1,5 @@
 <script>
-  import "bonsai.css/dist/bonsai-helpers.min.css";
-  import "bonsai.css/dist/bonsai-utilities.min.css";
+  import "bonsai.css/dist/bonsai.min.css";
 
   import router from "page";
   import { parse } from "query-string";
@@ -36,12 +35,4 @@
   router.start();
 </script>
 
-<h1>📒 pco spotify list ✨</h1>
 <svelte:component this={page} {params} />
-
-<style>
-  h1 {
-    color: dodgerblue;
-    font-size: 4em;
-  }
-</style>

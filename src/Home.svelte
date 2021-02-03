@@ -209,29 +209,38 @@
 </script>
 
 <main>
-  {#if isTokenValid}
-    <p>✅ Logged in to Spotify</p>
-    <button on:click={() => (playlist = createPlaylist())}
-      >Make the playlist!</button
-    >
-    {#if playlist}
-      {#await playlist}
-        <p style="color: pink">making playlist...</p>
-      {:then url}
-        <a
-          style="--d:block"
-          href={url}
-          target="_blank"
-          rel="noreferrer noopener">{url}</a
+  <div class="accent" style="--p:20px">
+    <h3 style="--weight:600">📒 pco spotify list ✨</h3>
+    {#if isTokenValid}
+      <div style="--d:flex; --ai:center">
+        <p style="--d:inline-block; --m:0">
+          ✅&nbsp;&nbsp; Logged in to Spotify
+        </p>
+        <button
+          style="--d:inline-block; --ml:auto; --my:0"
+          on:click={() => (playlist = createPlaylist())}
+          >Make the playlist!</button
         >
-      {:catch err}
-        <p style="color: red">something went wrong</p>
-      {/await}
+      </div>
+      {#if playlist}
+        {#await playlist}
+          <p style="color: pink">making playlist...</p>
+        {:then url}
+          <a
+            style="--d:block"
+            href={url}
+            target="_blank"
+            rel="noreferrer noopener">{url}</a
+          >
+        {:catch err}
+          <p style="color: red">something went wrong</p>
+        {/await}
+      {/if}
+    {:else}
+      <a href={spotifyAuthUrl}>Log in to Spotify</a>
+      <br /><br />
     {/if}
-  {:else}
-    <a href={spotifyAuthUrl}>Log in to Spotify</a>
-    <br /><br />
-  {/if}
+  </div>
   {#await getSongs()}
     <p>loading...</p>
   {:then _}
@@ -249,13 +258,14 @@
               checked={!!selected[index]}
               bind:group={selected}
               value={spotifyTracks[index].uri}
-              style="--t:scale(3)"
+              style="--t:scale(1.5)"
             />
           {:else if isTokenValid}
             <Search
               label="Replace {song.title} by {song.author}, if needed:"
               debounce={250}
               on:type={(e) => findNewRecordings({ query: e.detail, index })}
+              style="--w:calc(0.75 * 800px)"
             />
             {#if newRecordings[index]?.length}
               <div>
@@ -265,7 +275,7 @@
                       type="checkbox"
                       bind:group={selected}
                       value={alternate.uri}
-                      style="--mr:20px; --t:scale(3)"
+                      style="--mr:20px; --t:scale(1.5)"
                     />
                   </Track>
                 {/each}
@@ -287,6 +297,17 @@
 
   ul {
     padding-inline-start: 0;
+  }
+  .link-button {
+    background: none !important;
+    border: none;
+    padding: 0 !important;
+    margin: 0;
+    font-family: arial, sans-serif;
+    color: #069;
+    text-decoration: underline;
+    cursor: pointer;
+    box-shadow: none;
   }
 
   @media (min-width: 640px) {

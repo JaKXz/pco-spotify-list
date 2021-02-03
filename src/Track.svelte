@@ -2,7 +2,7 @@
   export let item;
 </script>
 
-<details style="--m:10px">
+<details style="--b:none">
   <summary>
     <a href={item.url} target="_blank" rel="noreferrer noopener">{item.name}</a>
     from {item.album.name}, last scheduled {item.last_scheduled_short_dates}
