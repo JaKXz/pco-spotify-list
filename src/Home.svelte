@@ -2,6 +2,7 @@
   import SpotifyWebApi from "spotify-web-api-js";
   import { stringify } from "query-string";
   import Search from "svelte-search";
+  import { addMonths } from "./utils/dates";
   import Track from "./Track.svelte";
 
   export let params;
@@ -48,6 +49,8 @@
               .filter(
                 ({ attributes }, index, array) =>
                   !attributes.title.toLowerCase().includes("christmas") &&
+                  new Date(attributes.last_scheduled_at) >
+                    addMonths(new Date(), -6) &&
                   array.findIndex(
                     (el) => el.attributes.title === attributes.title
                   ) === index
@@ -80,10 +83,10 @@
           )
         ).filter(
           ({ schedules }) =>
-            schedules.meta.total_count > 1 &&
             schedules.data.some(({ attributes }) =>
               attributes.service_type_name.toLowerCase().includes("downtown")
             ) &&
+            schedules.meta?.total_count > 1 &&
             schedules.data.every(
               ({ attributes }) =>
                 !attributes.service_type_name
@@ -247,7 +250,7 @@
     <ul>
       {#each songs.data as song, index (song.id)}
         <li
-          style="--my:1rem; --lis:none; --d:flex; --ai:baseline; --jc:flex-start"
+          style="--my:1rem; --lis:none; --d:flex; --ai:baseline; --jc:flex-start; --fw:wrap"
         >
           {#if spotifyTracks[index]}
             <Track item={{ ...song, ...spotifyTracks[index] }} />
@@ -283,6 +286,10 @@
             {/if}
           {:else}
             {song.title} by {song.author}, last scheduled {song.last_scheduled_short_dates}
+            <mark
+              style="--ml:auto; opacity: {song.schedules.meta.total_count /
+                104}">used {song.schedules.meta.total_count} times</mark
+            >
           {/if}
         </li>
       {/each}
