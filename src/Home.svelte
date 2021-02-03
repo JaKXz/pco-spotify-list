@@ -118,7 +118,7 @@
               author.includes("Marty Sampson") ||
               author.includes("Benjamin Hastings")
             ) {
-              artist = "Hillsong";
+              artist = "Live Hillsong";
             } else if (author.includes("Steven Furtick")) {
               artist = "Elevation";
             } else if (author.includes("Kari Jobe")) {
@@ -137,7 +137,7 @@
               author.includes("McClure") ||
               author.includes("Helser")
             ) {
-              artist = "Bethel";
+              artist = "Live Bethel";
             } else {
               artist = author.split(",")[0].split("and")[0];
             }
@@ -152,13 +152,14 @@
           return {
             ...rest,
             external_urls,
+            url: external_urls.spotify,
             artists,
             artist: artists[0].name,
-            url: external_urls.spotify,
             album,
             albumImg: album.images[1],
           };
         }
+        return null;
       });
       selected = spotifyTracks.map((track) => track?.uri);
     }
@@ -188,7 +189,6 @@
   function removeSpotifyTrack({ event, index }) {
     if (spotifyTracks[index] && event.target.checked === false) {
       spotifyTracks[index] = null;
-      selected[index] = null;
     }
   }
 
@@ -250,7 +250,6 @@
             <input
               on:change={(event) => removeSpotifyTrack({ event, index })}
               type="checkbox"
-              checked={!!selected[index]}
               bind:group={selected}
               value={spotifyTracks[index].uri}
               style="--t:scale(1.5)"

@@ -2,7 +2,7 @@
   export let item;
 </script>
 
-<details style="--b:none">
+<details style="--b:none; --w:100%">
   <summary>
     <a href={item.url} target="_blank" rel="noreferrer noopener">{item.name}</a>
     by {item.artist} from {item.album.name}
