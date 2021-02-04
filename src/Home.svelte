@@ -2,20 +2,12 @@
   import SpotifyWebApi from "spotify-web-api-js";
   import { stringify } from "query-string";
   import Search from "svelte-search";
-  import { addMonths } from "./utils/dates";
+  import PlanningCenterApi from "./utils/planning-center-api";
   import Track from "./Track.svelte";
 
   export let params;
 
-  const pcoApiUrl = `https://api.planningcenteronline.com/services/v2/songs`;
-  const pcoFetchOptions = {
-    headers: new Headers({
-      Authorization: `Basic ${btoa(
-        `${process.env.PCO_APP_ID}:${process.env.PCO_APP_SECRET}`
-      )}`,
-      "Content-Type": "application/json",
-    }),
-  };
+  const pcoApi = new PlanningCenterApi();
   const spotifyAuthUrl = `https://accounts.spotify.com/authorize?${stringify({
     client_id: process.env.SPOTIFY_CLIENT_ID,
     redirect_uri: `http://${window.location.host}/callback`,
@@ -33,118 +25,28 @@
   let selected = [];
 
   async function getSongs() {
-    songs = await fetch(
-      `${pcoApiUrl}?${stringify({
-        order: "-last_scheduled_at",
-        "where[hidden]": false,
-        per_page: 75,
-      })}`,
-      pcoFetchOptions
-    )
-      .then((response) => response.json())
-      .then(async ({ data, ...rest }) => ({
-        data: (
-          await Promise.all(
-            data
-              .filter(
-                ({ attributes }, index, array) =>
-                  !attributes.title.toLowerCase().includes("christmas") &&
-                  new Date(attributes.last_scheduled_at) >
-                    addMonths(new Date(), -6) &&
-                  array.findIndex(
-                    (el) =>
-                      el.attributes.title.toLowerCase() ===
-                      attributes.title.toLowerCase()
-                  ) === index
-              )
-              .map(async ({ attributes, id }) => {
-                const controller = new AbortController();
-                let timeoutInFlight;
-
-                const schedules = await Promise.race([
-                  fetch(
-                    `${pcoApiUrl}/${id}/song_schedules?${stringify({
-                      filter: "before",
-                      before: new Date().toISOString(),
-                      per_page: 5,
-                      order: "-plan_sort_date",
-                    })}`,
-                    { ...pcoFetchOptions, signal: controller.signal }
-                  ).then((res) => res.json()),
-                  new Promise((resolve) => {
-                    timeoutInFlight = setTimeout(() => {
-                      resolve({ meta: { total_count: 2 }, data: [] });
-                      controller.abort();
-                    }, 999);
-                  }),
-                ]);
-
-                clearTimeout(timeoutInFlight);
-                return { ...attributes, schedules, id };
-              })
-          )
-        ).filter(
-          ({ schedules }) =>
-            schedules.meta?.total_count > 1 &&
-            // schedules.data.some(({ attributes }) =>
-            //   attributes.service_type_name.toLowerCase().includes("downtown")
-            // ) &&
-            schedules.data.every(
-              ({ attributes }) =>
-                !attributes.service_type_name
-                  .toLowerCase()
-                  .includes("christmas")
-            )
-        ),
-        ...rest,
-      }));
+    songs = await pcoApi.getAllSongs().then(async ({ data, ...rest }) => ({
+      data: (
+        await Promise.all(
+          data
+            .filter(PlanningCenterApi.schedulesRequestFilters())
+            .map(pcoApi.getSongSchedules())
+        )
+      ).filter(PlanningCenterApi.schedulesCriteria()),
+      ...rest,
+    }));
 
     if (isTokenValid) {
       spotifyApi.setAccessToken(params.spotifyToken);
       spotifyUser = await spotifyApi.getMe();
       spotifyTracks = (
         await Promise.all(
-          songs.data.map(({ title, author }) => {
-            if (author == null) {
-              return spotifyApi.searchTracks(`${title}`, { limit: 1 });
-            }
-            let artist = "";
-            if (
-              author.includes("Brooke Fraser") ||
-              author.includes("Ligertwood") ||
-              author.includes("Reuben Morgan") ||
-              author.includes("Aodhan King") ||
-              author.includes("Houston") ||
-              author.includes("Marty Sampson") ||
-              author.includes("Benjamin Hastings")
-            ) {
-              artist = "Live Hillsong";
-            } else if (author.includes("Steven Furtick")) {
-              artist = "Elevation";
-            } else if (author.includes("Kari Jobe")) {
-              artist = "Kari Jobe";
-            } else if (author.includes("Aaron Moses")) {
-              artist = "Maverick City Music";
-            } else if (author.includes("Nate Moore")) {
-              artist = "Housefires";
-            } else if (author.includes("Mia Fieldes")) {
-              artist = "Vertical";
-            } else if (author.includes("Leslie Jordan")) {
-              artist = "All Sons";
-            } else if (author.includes("Cory Asbury")) {
-              artist = "Cory Asbury";
-            } else if (
-              author.includes("McClure") ||
-              author.includes("Helser")
-            ) {
-              artist = "Live Bethel";
-            } else {
-              artist = author.split(",")[0].split("and")[0];
-            }
-            return spotifyApi.searchTracks(`${title} ${artist.trim()}`, {
-              limit: 1,
-            });
-          })
+          songs.data.map((song) =>
+            spotifyApi.searchTracks(
+              PlanningCenterApi.mapAuthorsToArtistsQuery(song),
+              { limit: 1 }
+            )
+          )
         )
       ).map(({ tracks }) => {
         if (tracks.items.length) {
