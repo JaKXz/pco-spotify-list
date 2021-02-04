@@ -10,15 +10,15 @@
   const pcoApi = new PlanningCenterApi();
   const spotifyAuthUrl = `https://accounts.spotify.com/authorize?${stringify({
     client_id: process.env.SPOTIFY_CLIENT_ID,
-    redirect_uri: `http://${window.location.host}/callback`,
+    redirect_uri: `${window.location.protocol}//${window.location.host}/callback`,
     response_type: "token",
     scope: ["playlist-modify-public"],
     state: "123",
   })}`;
   const spotifyApi = new SpotifyWebApi();
+
   const isTokenValid =
     !!params.spotifyToken && new Date(params.spotifyTokenExpiry) > new Date();
-
   let spotifyUser;
   let songs = {};
   let spotifyTracks = [];
@@ -26,43 +26,43 @@
 
   async function getSongs() {
     songs = await pcoApi.getAllSongs().then(async ({ data, ...rest }) => ({
-      data: (
-        await Promise.all(
-          data
-            .filter(PlanningCenterApi.schedulesRequestFilters())
-            .map(pcoApi.getSongSchedules())
-        )
-      ).filter(PlanningCenterApi.schedulesCriteria()),
+      data: await Promise.all(
+        data
+          .filter(PlanningCenterApi.schedulesRequestFilters())
+          .map(pcoApi.getSongSchedules())
+      ).then((response) =>
+        response.filter(PlanningCenterApi.schedulesCriteria())
+      ),
       ...rest,
     }));
 
     if (isTokenValid) {
       spotifyApi.setAccessToken(params.spotifyToken);
       spotifyUser = await spotifyApi.getMe();
-      spotifyTracks = (
-        await Promise.all(
-          songs.data.map((song) =>
-            spotifyApi.searchTracks(
-              PlanningCenterApi.mapAuthorsToArtistsQuery(song),
-              { limit: 1 }
-            )
+      spotifyTracks = await Promise.all(
+        songs.data.map((song) =>
+          spotifyApi.searchTracks(
+            PlanningCenterApi.mapAuthorsToArtistsQuery(song),
+            { limit: 1 }
           )
         )
-      ).map(({ tracks }) => {
-        if (tracks.items.length) {
-          const { external_urls, album, artists, ...rest } = tracks.items[0];
-          return {
-            ...rest,
-            external_urls,
-            url: external_urls.spotify,
-            artists,
-            artist: artists[0].name,
-            album,
-            albumImg: album.images[1],
-          };
-        }
-        return null;
-      });
+      ).then((response) =>
+        response.map(({ tracks }) => {
+          if (tracks.items.length) {
+            const { external_urls, album, artists, ...rest } = tracks.items[0];
+            return {
+              ...rest,
+              external_urls,
+              url: external_urls.spotify,
+              artists,
+              artist: artists[0].name,
+              album,
+              albumImg: album.images[1],
+            };
+          }
+          return null;
+        })
+      );
       selected = spotifyTracks.map((track) => track?.uri);
     }
   }
@@ -134,8 +134,9 @@
         {/await}
       {/if}
     {:else}
-      <a href={spotifyAuthUrl}>Log in to Spotify</a>
-      <br /><br />
+      <p>
+        <a href={spotifyAuthUrl}>Log in to Spotify</a>
+      </p>
     {/if}
   </div>
   {#await getSongs()}
