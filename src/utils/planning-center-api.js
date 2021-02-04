@@ -22,11 +22,7 @@ export default class PlanningCenterApi {
     }).then((res) => res.json());
   }
 
-  getAllSongs({
-    order = "-last_scheduled_at",
-    perPage: per_page = 75,
-    ...params
-  } = {}) {
+  getAllSongs({ order = "-last_scheduled_at", per_page = 75, ...params } = {}) {
     return this.makeRequest({
       queryParams: {
         order,
@@ -43,7 +39,8 @@ export default class PlanningCenterApi {
       new Date(attributes.last_scheduled_at) > addMonths(new Date(), -6) &&
       array.findIndex(
         (el) =>
-          el.attributes.title.toLowerCase() === attributes.title.toLowerCase()
+          el.attributes.title.toLowerCase().trim() ===
+          attributes.title.toLowerCase().trim()
       ) === index;
   }
 
@@ -58,7 +55,7 @@ export default class PlanningCenterApi {
           queryParams: {
             filter: "before",
             before: new Date().toISOString(),
-            perPage: 5,
+            per_page: 5,
             order: "-plan_sort_date",
           },
           fetchOptions: { signal: controller.signal },
