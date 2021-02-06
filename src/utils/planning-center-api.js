@@ -33,14 +33,15 @@ export default class PlanningCenterApi {
     });
   }
 
-  static schedulesRequestFilters() {
+  static schedulesRequestFilters({ minusMonths = -6 } = {}) {
     return ({ attributes }, index, array) =>
-      !attributes.title.toLowerCase().includes("christmas") &&
-      new Date(attributes.last_scheduled_at) > addMonths(new Date(), -6) &&
+      !/christmas|little drummer boy/i.test(attributes.title) &&
+      new Date(attributes.last_scheduled_at) >
+        addMonths(new Date(), minusMonths) &&
       array.findIndex(
         (el) =>
-          el.attributes.title.toLowerCase().trim() ===
-          attributes.title.toLowerCase().trim()
+          el.attributes.title.trim().toLowerCase() ===
+          attributes.title.trim().toLowerCase()
       ) === index;
   }
 
@@ -76,12 +77,11 @@ export default class PlanningCenterApi {
   static schedulesCriteria() {
     return ({ schedules }) =>
       schedules.meta?.total_count > 1 &&
-      // schedules.data.some(({ attributes }) =>
-      //   attributes.service_type_name.toLowerCase().includes("downtown")
-      // ) &&
+      schedules.data.some(({ attributes }) =>
+        /downtown/i.test(attributes.service_type_name)
+      ) &&
       schedules.data.every(
-        ({ attributes }) =>
-          !attributes.service_type_name.toLowerCase().includes("christmas")
+        ({ attributes }) => !/christmas/i.test(attributes.service_type_name)
       );
   }
 
