@@ -1,6 +1,4 @@
-const getDaysInMonth = (year, month) => new Date(year, month, 0).getDate();
-
-export const addMonths = (input, months) => {
+export function addMonths(input, months) {
   const date = new Date(input);
   date.setDate(1);
   date.setMonth(date.getMonth() + months);
@@ -11,4 +9,8 @@ export const addMonths = (input, months) => {
     )
   );
   return date;
-};
+}
+
+function getDaysInMonth(year, month) {
+  return new Date(year, month, 0).getDate();
+}
