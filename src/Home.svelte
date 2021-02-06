@@ -165,6 +165,7 @@
           {#if spotifyTracks[index]}
             <Track item={{ ...song, ...spotifyTracks[index] }}>
               <div slot="pcoDescription">
+                PCO data:
                 <PcoDescription {song} {maxSongCount} />
               </div>
             </Track>
