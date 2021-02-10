@@ -1,3 +1,4 @@
+import ky from "ky";
 import { stringify } from "query-string";
 import { addMonths } from "./dates";
 
@@ -16,7 +17,7 @@ export default class PlanningCenterApi {
   }
 
   makeRequest({ endpoint = "songs", queryParams, fetchOptions }) {
-    return fetch(`${this.apiUrl}/${endpoint}?${stringify(queryParams)}`, {
+    return ky(`${this.apiUrl}/${endpoint}?${stringify(queryParams)}`, {
       ...this.fetchOptions,
       ...fetchOptions,
     }).then((res) => res.json());
@@ -59,7 +60,31 @@ export default class PlanningCenterApi {
             per_page: 5,
             order: "-plan_sort_date",
           },
-          fetchOptions: { signal: controller.signal },
+          fetchOptions: {
+            signal: controller.signal,
+            hooks: {
+              beforeRequest: [
+                (req) => {
+                  const cached = sessionStorage.getItem(`songSchedules.${id}`);
+                  if (cached) {
+                    return new Response(cached);
+                  }
+                  return req;
+                },
+              ],
+              afterResponse: [
+                async (_req, _options, response) => {
+                  if (response.ok) {
+                    sessionStorage.setItem(
+                      `songSchedules.${id}`,
+                      await response.clone().text()
+                    );
+                  }
+                  return response;
+                },
+              ],
+            },
+          },
         }),
         new Promise((resolve) => {
           timeoutInFlight = setTimeout(() => {
