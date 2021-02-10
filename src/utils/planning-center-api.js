@@ -1,3 +1,4 @@
+import ky from "ky";
 import { stringify } from "query-string";
 import { addMonths } from "./dates";
 
@@ -16,7 +17,7 @@ export default class PlanningCenterApi {
   }
 
   makeRequest({ endpoint = "songs", queryParams, fetchOptions }) {
-    return fetch(`${this.apiUrl}/${endpoint}?${stringify(queryParams)}`, {
+    return ky(`${this.apiUrl}/${endpoint}?${stringify(queryParams)}`, {
       ...this.fetchOptions,
       ...fetchOptions,
     }).then((res) => res.json());

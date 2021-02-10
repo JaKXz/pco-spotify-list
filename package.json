@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "bonsai.css": "^1.2.2",
+    "ky": "^0.26.0",
     "page": "^1.11.6",
     "query-string": "^6.13.8",
     "sirv-cli": "^1.0.0",
