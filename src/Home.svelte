@@ -74,7 +74,6 @@
   }
 
   let playlist;
-
   async function createPlaylist() {
     if (!spotifyUser || !isTokenValid) return;
 
