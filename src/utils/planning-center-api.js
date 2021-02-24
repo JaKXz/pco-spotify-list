@@ -102,9 +102,6 @@ export default class PlanningCenterApi {
   static schedulesCriteria() {
     return ({ schedules }) =>
       schedules.meta?.total_count > 1 &&
-      schedules.data.some(({ attributes }) =>
-        /downtown/i.test(attributes.service_type_name)
-      ) &&
       schedules.data.every(
         ({ attributes }) => !/christmas/i.test(attributes.service_type_name)
       );
