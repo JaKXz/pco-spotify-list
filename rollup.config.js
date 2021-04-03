@@ -87,7 +87,7 @@ export default {
 
     production &&
       purgecss({
-        content: ["public/**/*.css"],
+        content: ["public/index.html"],
       }),
     // If we're building for production (npm run build
     // instead of npm run dev), minify
