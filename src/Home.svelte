@@ -29,12 +29,14 @@
 
   async function getSongs() {
     songs = await pcoApi.getAllSongs().then(async ({ data, ...rest }) => ({
-      data: await Promise.all(
-        data
-          .filter(PlanningCenterApi.schedulesRequestFilters())
-          .map(pcoApi.getSongSchedules())
-      ).then((response) =>
-        response.filter(PlanningCenterApi.schedulesCriteria())
+      data: PlanningCenterApi.sortByUsageCount(
+        await Promise.all(
+          data
+            .filter(PlanningCenterApi.schedulesRequestFilters())
+            .map(pcoApi.getSongSchedules())
+        ).then((response) =>
+          response.filter(PlanningCenterApi.schedulesCriteria())
+        )
       ),
       ...rest,
     }));
@@ -226,18 +228,6 @@
 
   ul {
     padding-inline-start: 0;
-  }
-
-  .link-button {
-    background: none !important;
-    border: none;
-    padding: 0 !important;
-    margin: 0;
-    font-family: arial, sans-serif;
-    color: #069;
-    text-decoration: underline;
-    cursor: pointer;
-    box-shadow: none;
   }
 
   :global([data-svelte-search] label) {

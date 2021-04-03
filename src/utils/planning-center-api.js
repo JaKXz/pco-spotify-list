@@ -148,4 +148,10 @@ export default class PlanningCenterApi {
     }
     return `${title} ${artist.trim()}`;
   }
+
+  static sortByUsageCount(songs) {
+    return [...songs].sort(
+      (a, b) => a.schedules.meta.total_count - b.schedules.meta.total_count
+    );
+  }
 }
