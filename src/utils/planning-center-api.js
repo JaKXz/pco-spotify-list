@@ -23,7 +23,11 @@ export default class PlanningCenterApi {
     }).then((res) => res.json());
   }
 
-  getAllSongs({ order = "-last_scheduled_at", per_page = 75, ...params } = {}) {
+  getAllSongs({
+    order = "-last_scheduled_at",
+    per_page = 100,
+    ...params
+  } = {}) {
     return this.makeRequest({
       queryParams: {
         order,
@@ -32,18 +36,6 @@ export default class PlanningCenterApi {
         ...params,
       },
     });
-  }
-
-  static schedulesRequestFilters({ minusMonths = -6 } = {}) {
-    return ({ attributes }, index, array) =>
-      !/christmas|little drummer boy/i.test(attributes.title) &&
-      new Date(attributes.last_scheduled_at) >
-        addMonths(new Date(), minusMonths) &&
-      array.findIndex(
-        (el) =>
-          el.attributes.title.trim().toLowerCase() ===
-          attributes.title.trim().toLowerCase()
-      ) === index;
   }
 
   getSongSchedules() {
@@ -99,28 +91,27 @@ export default class PlanningCenterApi {
     };
   }
 
-  static schedulesCriteria() {
-    return ({ schedules }) =>
-      schedules.meta?.total_count > 1 &&
-      schedules.data.every(
-        ({ attributes }) => !/christmas/i.test(attributes.service_type_name)
-      );
-  }
-
   static mapAuthorsToArtistsQuery({ title, author }) {
     if (author == null) {
       return title;
     }
     let artist = "";
-    if (
-      author.includes("Brooke Fraser") ||
-      author.includes("Ligertwood") ||
-      author.includes("Reuben Morgan") ||
-      author.includes("Aodhan King") ||
-      author.includes("Houston") ||
-      author.includes("Marty Sampson") ||
-      author.includes("Benjamin Hastings")
-    ) {
+    const hillsong = checkAuthors([
+      "Brooke Fraser",
+      "Ligertwood",
+      "Reuben Morgan",
+      "Aodhan King",
+      "Houston",
+      "Marty Sampson",
+      "Benjamin Hastings",
+    ]);
+    const bethel = checkAuthors([
+      "McClure",
+      "Helser",
+      "Jenn Johnson",
+      "Brian Johnson",
+    ]);
+    if (hillsong({ author })) {
       artist = "Live Hillsong";
     } else if (author.includes("Steven Furtick")) {
       artist = "Elevation";
@@ -136,12 +127,7 @@ export default class PlanningCenterApi {
       artist = "All Sons";
     } else if (author.includes("Cory Asbury")) {
       artist = "Cory Asbury";
-    } else if (
-      author.includes("McClure") ||
-      author.includes("Helser") ||
-      author.includes("Jenn Johnson") ||
-      author.includes("Brian Johnson")
-    ) {
+    } else if (bethel({ author })) {
       artist = "Live Bethel";
     } else {
       artist = author.split(",")[0].split("and")[0];
@@ -149,9 +135,45 @@ export default class PlanningCenterApi {
     return `${title} ${artist.trim()}`;
   }
 
-  static sortByUsageCount(songs) {
-    return [...songs].sort(
-      (a, b) => a.schedules.meta.total_count - b.schedules.meta.total_count
+  async transformSongData(data) {
+    const songsWithSchedules = data
+      .filter(schedulesRequestFilters())
+      .map(this.getSongSchedules());
+    return sortByUsageCount(
+      await Promise.all(songsWithSchedules).then((response) =>
+        response.filter(schedulesCriteria())
+      )
     );
   }
+}
+
+function sortByUsageCount(songs) {
+  return [...songs].sort(
+    (a, b) => a.schedules.meta.total_count - b.schedules.meta.total_count
+  );
+}
+
+function schedulesRequestFilters({ minusMonths = -6 } = {}) {
+  return ({ attributes }, index, array) =>
+    !/christmas|little drummer boy/i.test(attributes.title) &&
+    new Date(attributes.last_scheduled_at) >
+      addMonths(new Date(), minusMonths) &&
+    array.findIndex(
+      (el) =>
+        el.attributes.title.trim().toLowerCase() ===
+        attributes.title.trim().toLowerCase()
+    ) === index;
+}
+
+function schedulesCriteria() {
+  return ({ schedules }) =>
+    schedules.meta?.total_count > 1 &&
+    schedules.data.every(
+      ({ attributes }) => !/christmas/i.test(attributes.service_type_name)
+    );
+}
+
+function checkAuthors(authors) {
+  const check = new RegExp(authors.join("|"));
+  return ({ author }) => check.test(author);
 }

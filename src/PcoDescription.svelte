@@ -5,7 +5,7 @@
   let pastDate =
     new Date(song.last_scheduled_at) < new Date()
       ? song.last_scheduled_short_dates
-      : song.schedules.data[0].attributes.plan_dates;
+      : song.schedules.data[0]?.attributes.plan_dates;
 </script>
 
 {song.title} by {song.author}, last scheduled for {pastDate}

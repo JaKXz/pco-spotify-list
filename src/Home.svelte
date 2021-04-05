@@ -29,15 +29,7 @@
 
   async function getSongs() {
     songs = await pcoApi.getAllSongs().then(async ({ data, ...rest }) => ({
-      data: PlanningCenterApi.sortByUsageCount(
-        await Promise.all(
-          data
-            .filter(PlanningCenterApi.schedulesRequestFilters())
-            .map(pcoApi.getSongSchedules())
-        ).then((response) =>
-          response.filter(PlanningCenterApi.schedulesCriteria())
-        )
-      ),
+      data: await pcoApi.transformSongData(data),
       ...rest,
     }));
     maxSongCount = Math.max(
