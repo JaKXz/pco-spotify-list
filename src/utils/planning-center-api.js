@@ -35,7 +35,14 @@ export default class PlanningCenterApi {
         "where[hidden]": false,
         ...params,
       },
-    });
+    }).then(async ({ data, ...rest }) => ({
+      ...rest,
+      data: sortByUsageCount(
+        await Promise.all(
+          data.filter(schedulesRequestFilters()).map(this.getSongSchedules())
+        ).then((response) => response.filter(schedulesCriteria()))
+      ),
+    }));
   }
 
   getSongSchedules() {
@@ -133,17 +140,6 @@ export default class PlanningCenterApi {
       artist = author.split(",")[0].split("and")[0];
     }
     return `${title} ${artist.trim()}`;
-  }
-
-  async transformSongData(data) {
-    const songsWithSchedules = data
-      .filter(schedulesRequestFilters())
-      .map(this.getSongSchedules());
-    return sortByUsageCount(
-      await Promise.all(songsWithSchedules).then((response) =>
-        response.filter(schedulesCriteria())
-      )
-    );
   }
 }
 

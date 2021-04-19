@@ -28,10 +28,7 @@
   let maxSongCount = 100;
 
   async function getSongs() {
-    songs = await pcoApi.getAllSongs().then(async ({ data, ...rest }) => ({
-      data: await pcoApi.transformSongData(data),
-      ...rest,
-    }));
+    songs = await pcoApi.getAllSongs();
     maxSongCount = Math.max(
       ...songs.data.map(({ schedules }) => schedules.meta.total_count)
     );
