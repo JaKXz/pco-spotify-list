@@ -120,8 +120,9 @@
         <button
           style="--d:inline-block; --ml:auto; --my:0"
           on:click={() => (playlist = createPlaylist())}
-          >Make the playlist!</button
         >
+          Make the playlist!
+        </button>
       </div>
       {#if playlist}
         {#await playlist}

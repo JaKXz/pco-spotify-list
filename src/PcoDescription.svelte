@@ -11,5 +11,6 @@
 {song.title} by {song.author}, last scheduled for {pastDate}
 <mark
   style="--ml:auto; opacity: {song.schedules.meta.total_count / maxSongCount}"
-  >used {song.schedules.meta.total_count} times
+>
+  used {song.schedules.meta.total_count} times
 </mark>

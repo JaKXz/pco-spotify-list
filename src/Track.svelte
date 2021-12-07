@@ -22,9 +22,9 @@
       {#if item.preview_url}
         <div style="--d:flex; --ai:center; --jc:space-between">
           Preview available:
-          <audio controls src={item.preview_url}
-            ><track kind="captions" /></audio
-          >
+          <audio controls src={item.preview_url}>
+            <track kind="captions" />
+          </audio>
         </div>
       {/if}
     </div>
