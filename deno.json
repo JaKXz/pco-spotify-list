@@ -1,8 +1,15 @@
 {
   "lint": {
-    "exclude": ["old/**"]
+    "exclude": [
+      "old/**"
+    ]
   },
   "fmt": {
-    "exclude": ["old/**"]
-  }
+    "exclude": [
+      "old/**"
+    ]
+  },
+  "unstable": [
+    "fmt-component"
+  ]
 }
