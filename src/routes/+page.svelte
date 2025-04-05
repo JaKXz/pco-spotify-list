@@ -5,15 +5,9 @@
 </script>
 
 {#each data.songs as song}
-  <div class="song">
+  <div>
     <h2>{song.title} by {song.author}</h2>
     <p>Last scheduled for {song.last_scheduled_at}</p>
-    <p>Used {song.schedules.meta.total_count} times</p>
+    <p>Used {song.schedules.meta?.total_count} times</p>
   </div>
 {/each}
-
-<style>
-  .song {
-    width: 100%;
-  }
-</style>

@@ -12,6 +12,7 @@ import { addMonths } from "$lib";
 interface Song extends ResourceObject {
   attributes: {
     title: string;
+    author: string;
     last_scheduled_at: string;
   };
 }
@@ -38,11 +39,7 @@ export default class PlanningCenterApi {
     this.apiUrl = `https://api.planningcenteronline.com/services/v2`;
     this.fetchOptions = {
       headers: new Headers({
-        Authorization: `Basic ${
-          btoa(
-            `${clientId}:${clientSecret}`,
-          )
-        }`,
+        Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
         "Content-Type": "application/json",
         ...headers,
       }),
@@ -67,15 +64,15 @@ export default class PlanningCenterApi {
       throw new Error("No data found");
     }
 
-    const songs = data.filter(({ attributes }, index, array) =>
-      !/christmas|little drummer boy/i.test(attributes.title) &&
-      new Date(attributes.last_scheduled_at) >
-        addMonths(new Date(), -6) &&
-      array.findIndex(
-          (el) =>
-            el.attributes.title.trim().toLowerCase() ===
-              attributes.title.trim().toLowerCase(),
-        ) === index
+    const songs = data.filter(
+      ({ attributes }, index, array) =>
+        !/christmas|little drummer boy/i.test(attributes.title) &&
+        new Date(attributes.last_scheduled_at) > addMonths(new Date(), -6) &&
+        array.findIndex(
+            (el) =>
+              el.attributes.title.trim().toLowerCase() ===
+                attributes.title.trim().toLowerCase(),
+          ) === index,
     );
 
     const songsWithSchedules = await Promise.all(
@@ -122,12 +119,10 @@ export default class PlanningCenterApi {
           }),
           new Promise<ResponseWithData<SongSchedule[]>>((resolve) => {
             timeoutInFlight = setTimeout(() => {
-              resolve(
-                {
-                  meta: { total_count: 2 },
-                  data: [],
-                },
-              );
+              resolve({
+                meta: { total_count: 2 },
+                data: [],
+              });
               controller.abort();
             }, 999);
           }),
@@ -140,24 +135,26 @@ export default class PlanningCenterApi {
 
     return {
       ...rest,
-      songs: songsWithSchedules.filter(({ schedules }) =>
-        schedules.meta?.total_count > 1 &&
-        schedules.data?.every(
-          ({ attributes }) => !/christmas/i.test(attributes.service_type_name),
-        )
+      songs: songsWithSchedules.filter(
+        ({ schedules }) =>
+          schedules.meta?.total_count > 1 &&
+          schedules.data?.every(
+            ({ attributes }) =>
+              !/christmas/i.test(attributes.service_type_name),
+          ),
       ),
     };
   }
 
-  private async makeRequest<
-    D extends ResourceObjectOrObjects,
-  >(
-    { endpoint = "songs", queryParams, fetchOptions }: {
-      endpoint?: string;
-      queryParams?: StringifiableRecord;
-      fetchOptions?: Options;
-    } = {},
-  ): Promise<Response<D>> {
+  private async makeRequest<D extends ResourceObjectOrObjects>({
+    endpoint = "songs",
+    queryParams,
+    fetchOptions,
+  }: {
+    endpoint?: string;
+    queryParams?: StringifiableRecord;
+    fetchOptions?: Options;
+  } = {}): Promise<Response<D>> {
     const res = await ky(
       `${this.apiUrl}/${endpoint}?${queryString.stringify(queryParams ?? {})}`,
       {
