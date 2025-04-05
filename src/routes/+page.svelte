@@ -1,13 +1,19 @@
 <script lang="ts">
-	import type {PageProps} from "./$types";
+  import type { PageProps } from "./$types";
 
-	let {data}: PageProps = $props();
+  let { data }: PageProps = $props();
 </script>
 
-<div>
-  <pre>
-    <code>
-        {JSON.stringify(data.data, null, 2)}
-    </code>
-  </pre>
-</div>
+{#each data.songs as song}
+  <div class="song">
+    <h2>{song.title} by {song.author}</h2>
+    <p>Last scheduled for {song.last_scheduled_at}</p>
+    <p>Used {song.schedules.meta.total_count} times</p>
+  </div>
+{/each}
+
+<style>
+  .song {
+    width: 100%;
+  }
+</style>
