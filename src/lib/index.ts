@@ -1,1 +1,16 @@
-// place files you want to import through the `$lib` alias in this folder.
+export function addMonths(input: Date, months: number) {
+  const date = new Date(input);
+  date.setDate(1);
+  date.setMonth(date.getMonth() + months);
+  date.setDate(
+    Math.min(
+      input.getDate(),
+      getDaysInMonth(date.getFullYear(), date.getMonth() + 1),
+    ),
+  );
+  return date;
+}
+
+function getDaysInMonth(year: number, month: number) {
+  return new Date(year, month, 0).getDate();
+}
