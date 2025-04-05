@@ -1,0 +1,8 @@
+{
+  "lint": {
+    "exclude": ["old/**"]
+  },
+  "fmt": {
+    "exclude": ["old/**"]
+  }
+}
