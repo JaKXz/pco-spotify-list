@@ -4,8 +4,11 @@
     "npm:@sveltejs/adapter-auto@4": "4.0.0_@sveltejs+kit@2.20.4__@sveltejs+vite-plugin-svelte@5.0.3___svelte@5.25.7____acorn@8.14.1___vite@6.2.5__svelte@5.25.7___acorn@8.14.1__vite@6.2.5_@sveltejs+vite-plugin-svelte@5.0.3__svelte@5.25.7___acorn@8.14.1__vite@6.2.5_svelte@5.25.7__acorn@8.14.1_vite@6.2.5",
     "npm:@sveltejs/kit@^2.16.0": "2.20.4_@sveltejs+vite-plugin-svelte@5.0.3__svelte@5.25.7___acorn@8.14.1__vite@6.2.5_svelte@5.25.7__acorn@8.14.1_vite@6.2.5",
     "npm:@sveltejs/vite-plugin-svelte@5": "5.0.3_svelte@5.25.7__acorn@8.14.1_vite@6.2.5",
+    "npm:ky@^1.8.0": "1.8.0",
+    "npm:query-string@^9.1.1": "9.1.1",
     "npm:svelte-check@4": "4.1.5_svelte@5.25.7__acorn@8.14.1_typescript@5.8.3",
     "npm:svelte@5": "5.25.7_acorn@8.14.1",
+    "npm:ts-json-api@^1.2.0": "1.2.0",
     "npm:typescript@5": "5.8.3",
     "npm:vite@^6.2.5": "6.2.5"
   },
@@ -266,6 +269,9 @@
         "ms"
       ]
     },
+    "decode-uri-component@0.4.1": {
+      "integrity": "sha512-+8VxcR21HhTy8nOt6jf20w0c9CADrw1O8d+VZ/YzzCt4bJ3uBjw+D1q2osAB8RnpwwaeYBxy0HyKQxD5JBMuuQ=="
+    },
     "deepmerge@4.3.1": {
       "integrity": "sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A=="
     },
@@ -314,6 +320,9 @@
     "fdir@6.4.3": {
       "integrity": "sha512-PMXmW2y1hDDfTSRc9gaXIuCCRpuoz3Kaz8cUelp3smouvfT632ozg2vrT6lJsHKKOF59YLbOGfAWGUcKEfRMQw=="
     },
+    "filter-obj@5.1.0": {
+      "integrity": "sha512-qWeTREPoT7I0bifpPUXtxkZJ1XJzxWtfoWWkdVGqa+eCr3SHW/Ocp89o8vLvbUuQnadybJpjOKu4V+RwO6sGng=="
+    },
     "fsevents@2.3.3": {
       "integrity": "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw=="
     },
@@ -328,6 +337,9 @@
     },
     "kleur@4.1.5": {
       "integrity": "sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ=="
+    },
+    "ky@1.8.0": {
+      "integrity": "sha512-DoKGmG27nT8t/1F9gV8vNzggJ3mLAyD49J8tTMWHeZvS8qLc7GlyTieicYtFzvDznMe/q2u38peOjkWc5/pjvw=="
     },
     "locate-character@3.0.0": {
       "integrity": "sha512-SW13ws7BjaeJ6p7Q6CO2nchbYEc3X3J6WrmTTDto7yMPqVSZTUyY5Tjbid+Ab8gLnATtygYtiDIJGQRRn2ZOiA=="
@@ -360,6 +372,17 @@
         "picocolors",
         "source-map-js"
       ]
+    },
+    "query-string@9.1.1": {
+      "integrity": "sha512-MWkCOVIcJP9QSKU52Ngow6bsAWAPlPK2MludXvcrS2bGZSl+T1qX9MZvRIkqUIkGLJquMJHWfsT6eRqUpp4aWg==",
+      "dependencies": [
+        "decode-uri-component",
+        "filter-obj",
+        "split-on-first"
+      ]
+    },
+    "ramda@0.26.1": {
+      "integrity": "sha512-hLWjpy7EnsDBb0p+Z3B7rPi3GDeRG5ZtiI33kJhTt+ORCd38AbAIjB/9zRIUoeTbE/AVX5ZkU7m6bznsvrf8eQ=="
     },
     "readdirp@4.1.2": {
       "integrity": "sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg=="
@@ -411,6 +434,9 @@
     "source-map-js@1.2.1": {
       "integrity": "sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA=="
     },
+    "split-on-first@3.0.0": {
+      "integrity": "sha512-qxQJTx2ryR0Dw0ITYyekNQWpz6f8dGd7vffGNflQQ3Iqj9NJ6qiZ7ELpZsJ/QBhIVAiDfXdag3+Gp8RvWa62AA=="
+    },
     "svelte-check@4.1.5_svelte@5.25.7__acorn@8.14.1_typescript@5.8.3": {
       "integrity": "sha512-Gb0T2IqBNe1tLB9EB1Qh+LOe+JB8wt2/rNBDGvkxQVvk8vNeAoG+vZgFB/3P5+zC7RWlyBlzm9dVjZFph/maIg==",
       "dependencies": [
@@ -445,6 +471,12 @@
     "totalist@3.0.1": {
       "integrity": "sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ=="
     },
+    "ts-json-api@1.2.0": {
+      "integrity": "sha512-hrH/m9KvidS6gHIfZwH3v/9Jb92CVZvJvFYQrpBDyHhBgWcKa2ol9hPAifEn8u4dpjnvuHG6xZoJgxHfGM5ouw==",
+      "dependencies": [
+        "ramda"
+      ]
+    },
     "typescript@5.8.3": {
       "integrity": "sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ=="
     },
@@ -473,8 +505,11 @@
         "npm:@sveltejs/adapter-auto@4",
         "npm:@sveltejs/kit@^2.16.0",
         "npm:@sveltejs/vite-plugin-svelte@5",
+        "npm:ky@^1.8.0",
+        "npm:query-string@^9.1.1",
         "npm:svelte-check@4",
         "npm:svelte@5",
+        "npm:ts-json-api@^1.2.0",
         "npm:typescript@5",
         "npm:vite@^6.2.5"
       ]
