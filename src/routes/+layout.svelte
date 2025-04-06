@@ -1,11 +1,26 @@
 <script>
   import "../app.css";
+  import { addMonths } from "$lib";
 
   let { children } = $props();
 </script>
 
-<nav></nav>
-<main class="w-full max-w-4xl mx-auto px-4 py-8">
-  {@render children()}
-</main>
-<div></div>
+<div aria-hidden="true"></div>
+<div>
+  <header>
+    <h2>pco + spotify list ✨</h2>
+    <aside>
+      These are songs in "active" rotation that have been scheduled since {
+        addMonths(
+          new Date(),
+          -6,
+        ).toDateString()
+      }. Use the checkboxes to include them in the list that'll be generated in
+      Spotify, or uncheck them and find a different recording as necessary :)
+    </aside>
+  </header>
+  <main>
+    {@render children()}
+  </main>
+</div>
+<div aria-hidden="true"></div>

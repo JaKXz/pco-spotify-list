@@ -13,6 +13,7 @@ interface Song extends ResourceObject {
   attributes: {
     title: string;
     author: string;
+    copyright?: string;
     last_scheduled_at: string;
   };
 }
@@ -46,7 +47,7 @@ export default class PlanningCenterApi {
     };
   }
 
-  public async getAllSongs({
+  public async getSongsWithSchedules({
     order = "-last_scheduled_at",
     per_page = 100,
     ...params
@@ -76,7 +77,7 @@ export default class PlanningCenterApi {
     );
 
     const songsWithSchedules = await Promise.all(
-      songs.map(async ({ attributes, id }) => {
+      songs.map(async ({ attributes, id, ...song }) => {
         const controller = new AbortController();
         let timeoutInFlight;
 
@@ -104,7 +105,7 @@ export default class PlanningCenterApi {
                   },
                 ],
                 afterResponse: [
-                  async (_req, _options, response) => {
+                  async (_, __, response) => {
                     if (response.ok) {
                       sessionStorage.setItem(
                         `songSchedules.${id}`,
@@ -129,7 +130,8 @@ export default class PlanningCenterApi {
         ]);
 
         clearTimeout(timeoutInFlight);
-        return { ...attributes, schedules, id };
+
+        return { ...song, ...attributes, schedules, id };
       }),
     );
 
