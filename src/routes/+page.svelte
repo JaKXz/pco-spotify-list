@@ -1,26 +1,33 @@
 <script lang="ts">
-  import type { PageProps } from "./$types";
+	import type {PageProps} from "./$types";
 
-  let { data }: PageProps = $props();
+	const Spotify = import("$lib/Spotify.svelte");
 
-  let songs = [...data.songs].sort(
-    (a, b) => a.schedules.meta?.total_count - b.schedules.meta?.total_count,
-  );
+	let {data}: PageProps = $props();
 
-  function formatDate(date: string) {
-    return new Intl.DateTimeFormat(undefined, {
-      dateStyle: "medium",
-    }).format(new Date(date));
-  }
+	let songs = [...data.songs].sort(
+		(a, b) => a.schedules.meta?.total_count - b.schedules.meta?.total_count,
+	);
+	let maxSongCount = Math.max(
+		...songs.map(({schedules}) => schedules.meta?.total_count),
+	);
+
+	function formatDate(date: string) {
+		return new Intl.DateTimeFormat(undefined, {
+			dateStyle: "medium",
+		}).format(new Date(date));
+	}
 </script>
 
-<button>Log in to spotify</button>
+{#await Spotify then {default: Spotify}}
+    <Spotify {songs}/>
+{/await}
 
 {#each songs as song}
-  <div>
-    <h3><em>{song.title}</em> by {song.author}</h3>
-    <p>{song.copyright}</p>
-    <p>Last scheduled for {formatDate(song.last_scheduled_at)}</p>
-    <p>Used {song.schedules.meta?.total_count} times</p>
-  </div>
+    <div>
+        <h3><em>{song.title}</em> by {song.author}</h3>
+        <p>{song.copyright}</p>
+        <p>Last scheduled for {formatDate(song.last_scheduled_at)}</p>
+        <p>Used {song.schedules.meta?.total_count} times</p>
+    </div>
 {/each}

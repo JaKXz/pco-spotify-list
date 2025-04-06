@@ -166,4 +166,8 @@ export default class PlanningCenterApi {
     );
     return await res.json();
   }
+
+  static mapAuthorsToArtistsQuery(song: any) {
+    return "";
+  }
 }
