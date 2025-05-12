@@ -25,6 +25,10 @@ interface SongSchedule extends ResourceObject {
   };
 }
 
+export type SongWithSchedules = Song["attributes"] & {
+  schedules: Response<SongSchedule[]>;
+};
+
 export default class PlanningCenterApi {
   private readonly apiUrl: string;
   private readonly fetchOptions: Options;

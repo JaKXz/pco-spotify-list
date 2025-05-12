@@ -1,16 +1,17 @@
 <script lang="ts">
+	import {get} from "svelte/store";
+
+	import {songs} from "$lib/store";
 	import type {PageProps} from "./$types";
 
 	const Spotify = import("$lib/Spotify.svelte");
 
 	let {data}: PageProps = $props();
 
-	let songs = [...data.songs].sort(
+	songs.set([...data.songs].sort(
 		(a, b) => a.schedules.meta?.total_count - b.schedules.meta?.total_count,
-	);
-	let maxSongCount = Math.max(
-		...songs.map(({schedules}) => schedules.meta?.total_count),
-	);
+	));
+	let maxSongCount = Math.max(...get(songs).map(({schedules}) => schedules.meta?.total_count));
 
 	function formatDate(date: string) {
 		return new Intl.DateTimeFormat(undefined, {
@@ -20,10 +21,10 @@
 </script>
 
 {#await Spotify then {default: Spotify}}
-    <Spotify {songs}/>
+    <Spotify/>
 {/await}
 
-{#each songs as song}
+{#each get(songs) as song}
     <div>
         <h3><em>{song.title}</em> by {song.author}</h3>
         <p>{song.copyright}</p>

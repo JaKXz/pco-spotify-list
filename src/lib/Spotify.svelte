@@ -1,11 +1,11 @@
 <script lang="ts">
 	import queryString from "query-string";
-	import {PUBLIC_SPOTIFY_CLIENT_ID} from "$env/static/public";
 	import SpotifyWebApi from "spotify-web-api-js";
+	import {get} from "svelte/store";
+	import {PUBLIC_SPOTIFY_CLIENT_ID} from "$env/static/public";
 	import {useLocalStorage} from "$lib/localstorage.svelte";
 	import PlanningCenterApi from "$lib/planning-center-api";
-
-	let {songs}: { songs: any[] } = $props();
+	import {songs} from "$lib/store";
 
 	const spotifyAuthUrl = `https://accounts.spotify.com/authorize?${queryString.stringify({
 		client_id: PUBLIC_SPOTIFY_CLIENT_ID,
@@ -26,18 +26,20 @@
 		if (isTokenValid) {
 			spotifyApi.setAccessToken(token);
 			spotifyUser = await spotifyApi.getMe();
+			const currentSongs = get(songs);
 			spotifyTracks = await Promise.all(
-				songs.map((song) =>
+				currentSongs.map((song) =>
 					spotifyApi.searchTracks(PlanningCenterApi.mapAuthorsToArtistsQuery(song), {
 						limit: 1,
 					}),
 				),
 			).then((response) =>
-				response.map(({tracks}) => {
+				response.map(({tracks}, i) => {
 					if (tracks.items.length) {
 						const {external_urls, album, artists, ...rest} = tracks.items[0];
 						return {
 							...rest,
+							...currentSongs[i],
 							external_urls,
 							url: external_urls.spotify,
 							artists,
