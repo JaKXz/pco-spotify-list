@@ -1,0 +1,12 @@
+{
+  "format_on_save": "off",
+  "formatter": {
+    "external": {
+      "command": "deno",
+      "arguments": [
+        "fmt",
+        "-"
+      ]
+    }
+  }
+}
