@@ -6,7 +6,7 @@ export const handle: Handle = async ({ event, resolve }) => {
       "/.well-known/appspecific/com.chrome.devtools",
     )
   ) {
-    return new Response(null, { status: 204 }); // Return empty response with 204 No Content
+    return new Response(null, { status: 204 });
   }
 
   return resolve(event);

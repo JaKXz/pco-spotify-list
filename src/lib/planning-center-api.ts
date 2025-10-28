@@ -168,10 +168,58 @@ export default class PlanningCenterApi {
         ...fetchOptions,
       },
     );
-    return await res.json();
+    if (!res.ok) {
+      console.error("uh oh", await res.text());
+    }
+    return res.json();
   }
 
-  static mapAuthorsToArtistsQuery(song: any) {
-    return "";
+  static mapAuthorsToArtistsQuery({ title, author }: Song["attributes"]) {
+    if (author == null) {
+      return title;
+    }
+    let artist = "";
+    const hillsong = checkAuthors([
+      "Brooke Fraser",
+      "Ligertwood",
+      "Reuben Morgan",
+      "Aodhan King",
+      "Houston",
+      "Marty Sampson",
+      "Benjamin Hastings",
+    ]);
+    const bethel = checkAuthors([
+      "McClure",
+      "Helser",
+      "Jenn Johnson",
+      "Brian Johnson",
+    ]);
+    if (hillsong(author)) {
+      artist = "Live Hillsong";
+    } else if (author.includes("Steven Furtick")) {
+      artist = "Elevation";
+    } else if (author.includes("Kari Jobe")) {
+      artist = "Kari Jobe";
+    } else if (author.includes("Aaron Moses")) {
+      artist = "Maverick City Music";
+    } else if (author.includes("Nate Moore")) {
+      artist = "Housefires";
+    } else if (author.includes("Mia Fieldes")) {
+      artist = "Vertical";
+    } else if (author.includes("Leslie Jordan")) {
+      artist = "All Sons";
+    } else if (author.includes("Cory Asbury")) {
+      artist = "Cory Asbury";
+    } else if (bethel(author)) {
+      artist = "Live Bethel";
+    } else {
+      artist = author.split(",")[0].split("and")[0];
+    }
+    return `${title} ${artist.trim()}`;
   }
+}
+
+function checkAuthors(authors: string[]) {
+  const check = new RegExp(authors.join("|"));
+  return (author: string) => check.test(author);
 }
