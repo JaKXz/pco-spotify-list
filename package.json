@@ -19,7 +19,8 @@
 		"prettier-plugin-tailwindcss": "^0.7.2",
 		"svelte": "^5.0.0",
 		"tailwindcss": "^4.0.0",
-		"vite": "^6.0.0"
+		"vite": "^6.0.0",
+		"vite-plugin-devtools-json": "^1.0.0"
 	},
 	"dependencies": {
 		"spotify-web-api-js": "^1.5.2"
