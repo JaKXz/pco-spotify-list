@@ -31,14 +31,11 @@
 		const { codeVerifier, codeChallenge } = await generatePKCE();
 		storeCodeVerifier(codeVerifier);
 
-		const redirectUri = `${window.location.origin}/callback`;
-
-		// console.log({ redirectUri });
-
+		const host = window.location.host.includes('localhost') ? '127.0.0.1' : window.location.host;
 		const params = new URLSearchParams({
 			client_id: SPOTIFY_CLIENT_ID,
 			response_type: 'code',
-			redirect_uri: redirectUri,
+			redirect_uri: `${window.location.protocol}//${host}/callback`,
 			scope: 'playlist-modify-public',
 			code_challenge_method: 'S256',
 			code_challenge: codeChallenge,
