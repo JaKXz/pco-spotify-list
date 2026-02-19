@@ -1,0 +1,7 @@
+[build]
+  command = "pnpm run build"
+  publish = "build"
+
+[dev]
+  command = "pnpm run dev"
+  port = 5173
