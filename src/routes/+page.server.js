@@ -1,4 +1,5 @@
 import { env } from '$env/dynamic/private';
+import { mapAuthorsToArtistsQuery } from '$lib/utils/artist-mapping';
 
 const PCO_API_URL = 'https://api.planningcenteronline.com/services/v2';
 
@@ -96,54 +97,6 @@ function schedulesCriteria(song) {
 
 function sortByUsageCount(songs) {
 	return [...songs].sort((a, b) => a.schedules.meta.total_count - b.schedules.meta.total_count);
-}
-
-// ---------------------------------------------------------------------------
-// Author → Spotify artist mapping
-// ---------------------------------------------------------------------------
-function mapAuthorsToArtistsQuery({ title, author }) {
-	if (author == null) return title;
-
-	const checkAuthors = (authors) => {
-		const re = new RegExp(authors.join('|'));
-		return (a) => re.test(a);
-	};
-
-	const isHillsong = checkAuthors([
-		'Brooke Fraser',
-		'Ligertwood',
-		'Reuben Morgan',
-		'Aodhan King',
-		'Houston',
-		'Marty Sampson',
-		'Benjamin Hastings'
-	]);
-	const isBethel = checkAuthors(['McClure', 'Helser', 'Jenn Johnson', 'Brian Johnson']);
-
-	let artist = '';
-	if (isHillsong(author)) {
-		artist = 'Live Hillsong';
-	} else if (author.includes('Steven Furtick')) {
-		artist = 'Elevation';
-	} else if (author.includes('Kari Jobe')) {
-		artist = 'Kari Jobe';
-	} else if (author.includes('Aaron Moses')) {
-		artist = 'Maverick City Music';
-	} else if (author.includes('Nate Moore')) {
-		artist = 'Housefires';
-	} else if (author.includes('Mia Fieldes')) {
-		artist = 'Vertical';
-	} else if (author.includes('Leslie Jordan')) {
-		artist = 'All Sons';
-	} else if (author.includes('Cory Asbury')) {
-		artist = 'Cory Asbury';
-	} else if (isBethel(author)) {
-		artist = 'Live Bethel';
-	} else {
-		artist = author.split(',')[0].split('and')[0];
-	}
-
-	return `${title} ${artist.trim()}`;
 }
 
 // ---------------------------------------------------------------------------
