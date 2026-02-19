@@ -19,28 +19,22 @@
 	</summary>
 
 	<div class="flex items-center justify-between gap-4 border-t border-gray-200 bg-gray-50 p-4">
-		{#if item.albumImg}
-			<img
-				class="block shrink-0 rounded shadow-sm"
-				src={item.albumImg.url}
-				height={item.albumImg.height}
-				width={item.albumImg.width || item.albumImg.height}
-				alt={item.album.name}
-			/>
-		{/if}
-
 		<div class="flex min-h-30 flex-1 flex-col justify-evenly gap-3">
 			{#if pcoDescription}
 				{@render pcoDescription()}
 			{/if}
 
-			{#if item.preview_url}
-				<div class="flex items-center gap-3 text-sm text-gray-600">
-					<span>Preview:</span>
-					<audio controls src={item.preview_url} class="h-8">
-						<track kind="captions" />
-					</audio>
-				</div>
+			{#if item.id}
+				<iframe
+					title="Spotify player for {item.name}"
+					src="https://open.spotify.com/embed/track/{item.id}?utm_source=generator&theme=0"
+					width="100%"
+					height="80"
+					frameborder="0"
+					allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+					loading="lazy"
+					class="rounded"
+				></iframe>
 			{/if}
 		</div>
 
