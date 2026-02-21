@@ -45,7 +45,7 @@
 
 	onMount(async () => {
 		spotifyToken = localStorage.getItem('spotifyToken');
-		spotifyTokenExpiry = localStorage.getItem('spotifyTokenExpiry');
+		spotifyTokenExpiry = Number(localStorage.getItem('spotifyTokenExpiry') ?? 0);
 
 		if (spotifyToken && isTokenValid) {
 			await loadSpotifyData();
@@ -97,8 +97,6 @@
 			error = 'Unable to create playlist';
 			return;
 		}
-
-		console.log({ spotifyTracks });
 
 		playlistLoading = true;
 		error = null;
