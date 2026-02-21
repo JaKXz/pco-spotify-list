@@ -1,5 +1,6 @@
 import { env } from '$env/dynamic/private';
-import { mapAuthorsToArtistsQuery } from '$lib/utils/artist-mapping';
+import { mapAuthorsToArtistsQuery } from '$lib/artist-mapping';
+import { addMonths } from '$lib/dates';
 
 const PCO_API_URL = 'https://api.planningcenteronline.com/services/v2';
 
@@ -26,18 +27,6 @@ function cacheGet(key) {
 
 function cacheSet(key, data, ttl = CACHE_TTL_MS) {
 	cache.set(key, { data, expiresAt: Date.now() + ttl });
-}
-
-// ---------------------------------------------------------------------------
-// Date helpers
-// ---------------------------------------------------------------------------
-function addMonths(input, months) {
-	const date = new Date(input);
-	date.setDate(1);
-	date.setMonth(date.getMonth() + months);
-	const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-	date.setDate(Math.min(input.getDate(), daysInMonth));
-	return date;
 }
 
 // ---------------------------------------------------------------------------
