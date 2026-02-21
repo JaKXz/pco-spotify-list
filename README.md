@@ -12,7 +12,7 @@ Songs are filtered to those in "active" rotation — scheduled in the last 6 mon
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org) 18+
+- [Node.js](https://nodejs.org) 24+
 - A [Planning Center Developer](https://api.planningcenteronline.com/) Personal Access Token (Application ID + Secret)
 - A [Spotify Developer](https://developer.spotify.com/dashboard) Application (Client ID)
 

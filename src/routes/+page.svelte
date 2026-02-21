@@ -1,14 +1,12 @@
 <script>
-	import SpotifyWebApi from 'spotify-web-api-js';
+	import { SpotifyApi } from '$lib/spotify-api';
 	import { onMount } from 'svelte';
 	import Track from '$lib/components/Track.svelte';
 	import PcoDescription from '$lib/components/PcoDescription.svelte';
-	import { generatePKCE, storeCodeVerifier } from '$lib/utils/pkce.js';
+	import { generatePKCE, storeCodeVerifier } from '$lib/pkce';
 
 	/** @type {{ data: import('./$types').PageData }} */
 	let { data } = $props();
-
-	const SPOTIFY_CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
 
 	let spotifyToken = $state(null);
 	let spotifyTokenExpiry = $state(null);
@@ -21,10 +19,10 @@
 	let playlistLoading = $state(false);
 	let searchResults = $state({});
 
-	const spotifyApi = new SpotifyWebApi();
+	const spotifyApi = new SpotifyApi();
 
 	const isTokenValid = $derived(
-		!!spotifyToken && !!spotifyTokenExpiry && new Date(spotifyTokenExpiry) > new Date()
+		!!spotifyToken && !!spotifyTokenExpiry && spotifyTokenExpiry > Date.now()
 	);
 
 	async function loginToSpotify() {
@@ -33,7 +31,7 @@
 
 		const host = window.location.host.includes('localhost') ? '127.0.0.1' : window.location.host;
 		const params = new URLSearchParams({
-			client_id: SPOTIFY_CLIENT_ID,
+			client_id: import.meta.env.VITE_SPOTIFY_CLIENT_ID,
 			response_type: 'code',
 			redirect_uri: `${window.location.protocol}//${host}/callback`,
 			scope: 'playlist-modify-public',
@@ -46,16 +44,8 @@
 	}
 
 	onMount(async () => {
-		const storedToken = localStorage.getItem('spotifyToken');
-		const storedExpiry = localStorage.getItem('spotifyTokenExpiry');
-
-		if (storedToken && storedExpiry) {
-			const expiryNum = Number(storedExpiry);
-			if (new Date(expiryNum) > new Date()) {
-				spotifyToken = storedToken;
-				spotifyTokenExpiry = expiryNum;
-			}
-		}
+		spotifyToken = localStorage.getItem('spotifyToken');
+		spotifyTokenExpiry = localStorage.getItem('spotifyTokenExpiry');
 
 		if (spotifyToken && isTokenValid) {
 			await loadSpotifyData();
@@ -95,29 +85,35 @@
 
 			selected = spotifyTracks.map((track) => track?.uri).filter(Boolean);
 		} catch (err) {
-			error = err.message;
+			console.error(err);
+			error = err.message || err.responseText || JSON.stringify(err, null, 2);
 		} finally {
 			loading = false;
 		}
 	}
 
 	async function createPlaylist() {
-		if (!spotifyUser || !isTokenValid) return;
+		if (!spotifyUser || !isTokenValid) {
+			error = 'Unable to create playlist';
+			return;
+		}
+
+		console.log({ spotifyTracks });
+
 		playlistLoading = true;
-		playlist = null;
 		error = null;
 		try {
-			const { id, external_urls } = await spotifyApi.createPlaylist(spotifyUser.id, {
-				name: 'Active Songs',
-				description: `auto generated from the last ~${selected.length} scheduled songs on PCO`
-			});
+			const { id, externalUrl } = await spotifyApi.createPlaylist(
+				'Active Songs',
+				`auto generated from the last ~${selected.length} scheduled songs on PCO`
+			);
 			const validUris = selected.filter(
 				(uri) => typeof uri === 'string' && uri.includes('spotify:track:')
 			);
 			if (validUris.length) {
 				await spotifyApi.addTracksToPlaylist(id, validUris);
 			}
-			playlist = external_urls.spotify;
+			return externalUrl;
 		} catch (err) {
 			error = err.message;
 		} finally {
@@ -180,11 +176,11 @@
 			Spotify, or uncheck them and find a different recording as necessary :)
 		</p>
 
-		{#if isTokenValid}
+		{#if isTokenValid && spotifyUser}
 			<div class="mt-4 flex items-center justify-between">
 				<p class="text-sm text-green-700">✅ Logged in to Spotify</p>
 				<button
-					onclick={createPlaylist}
+					onclick={() => (playlist = createPlaylist())}
 					disabled={playlistLoading || loading}
 					class="rounded bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
 				>
@@ -192,14 +188,16 @@
 				</button>
 			</div>
 			{#if playlist}
-				<a
-					href={playlist}
-					target="_blank"
-					rel="noreferrer noopener"
-					class="mt-2 block text-sm text-green-700 underline hover:text-green-900"
-				>
-					{playlist}
-				</a>
+				{#await playlist then url}
+					<a
+						href={url}
+						target="_blank"
+						rel="noreferrer noopener"
+						class="mt-2 block text-lg text-green-700 underline hover:text-green-900"
+					>
+						Here is your playlist!
+					</a>
+				{/await}
 			{/if}
 		{:else}
 			<p class="mt-4">

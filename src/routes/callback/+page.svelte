@@ -1,9 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { retrieveCodeVerifier } from '$lib/utils/pkce.js';
-
-	const SPOTIFY_CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+	import { retrieveCodeVerifier } from '$lib/pkce';
 
 	let error = $state(null);
 
@@ -35,7 +33,7 @@
 					'Content-Type': 'application/x-www-form-urlencoded'
 				},
 				body: new URLSearchParams({
-					client_id: SPOTIFY_CLIENT_ID,
+					client_id: import.meta.env.VITE_SPOTIFY_CLIENT_ID,
 					grant_type: 'authorization_code',
 					code,
 					redirect_uri: `${window.location.origin}/callback`,
