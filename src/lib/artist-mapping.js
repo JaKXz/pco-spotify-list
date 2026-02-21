@@ -64,5 +64,5 @@ export function mapAuthorsToArtistsQuery({ title, author }) {
 		artist = author.split(',')[0].split('and')[0];
 	}
 
-	return `${title} ${artist.trim()}`;
+	return `track:${title} artist:${artist.trim()}`;
 }
