@@ -12,7 +12,7 @@ export class SpotifyApi {
 		this.token = token;
 	}
 
-	async getMe(): Promise<SpotifyApi.CurrentUsersProfileResponse> {
+	getMe(): Promise<SpotifyApi.CurrentUsersProfileResponse> {
 		return this.#makeRequest('me');
 	}
 
@@ -20,10 +20,7 @@ export class SpotifyApi {
 	 * types/spotify-api is outdated here so we're using a subset of the request and response params
 	 * https://developer.spotify.com/documentation/web-api/reference/create-playlist
 	 */
-	async createPlaylist(
-		name: string,
-		description: string
-	): Promise<{ id: string; externalUrl: string }> {
+	createPlaylist(name: string, description: string): Promise<{ id: string; externalUrl: string }> {
 		type CreatePlaylistResponseSubset = Pick<
 			SpotifyApi.PlaylistBaseObject,
 			| 'collaborative'
@@ -53,7 +50,7 @@ export class SpotifyApi {
 	/**
 	 * https://developer.spotify.com/documentation/web-api/reference/add-items-to-playlist
 	 */
-	async addTracksToPlaylist(
+	addTracksToPlaylist(
 		id: string,
 		uris: string[]
 	): Promise<Pick<SpotifyApi.PlaylistBaseObject, 'snapshot_id'>> {
@@ -63,18 +60,18 @@ export class SpotifyApi {
 		});
 	}
 
-	async searchTracks(
+	searchTracks(
 		q: string,
-		options: Exclude<SpotifyApi.SearchForItemParameterObject, 'q' | 'type'>
+		options: Omit<SpotifyApi.SearchForItemParameterObject, 'q' | 'type'>
 	): Promise<SpotifyApi.TrackSearchResponse> {
-		return this.#search({
+		return this.search({
 			q,
 			...options,
 			type: 'track'
 		});
 	}
 
-	async #search<T = SpotifyApi.SearchResponse>(
+	search<T = SpotifyApi.SearchResponse>(
 		options: SpotifyApi.SearchForItemParameterObject
 	): Promise<T> {
 		const params = new URLSearchParams(Object.entries(options));
