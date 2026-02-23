@@ -55,7 +55,9 @@ async function pcoFetch(endpoint, queryParams = {}) {
 	});
 
 	if (!res.ok) {
-		throw new Error(`PCO API error: ${res.status} ${res.statusText}`);
+		throw new Error(
+			`PCO API error: ${res.status} ${res.statusText}\n Headers: ${res.headers}\n ${res.url}`
+		);
 	}
 
 	const data = await res.json();
