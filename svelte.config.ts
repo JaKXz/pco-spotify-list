@@ -5,13 +5,7 @@ import type { Config } from '@sveltejs/kit';
 const config = {
 	preprocess: vitePreprocess(),
 	kit: {
-		adapter: adapter(),
-		typescript: {
-			config: (config) => ({
-				...config,
-				include: [...config.include, 'node_modules/@types/spotify-api/index.d.ts']
-			})
-		}
+		adapter: adapter()
 	}
 } satisfies Config;
 
