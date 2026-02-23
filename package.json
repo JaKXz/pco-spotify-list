@@ -7,9 +7,9 @@
 	},
 	"private": true,
 	"scripts": {
-		"dev": "vite dev --host 127.0.0.1",
+		"dev": "vite --host 127.0.0.1",
 		"build": "vite build",
-		"preview": "vite preview",
+		"preview": "pnpm run dev preview --port 5173",
 		"format": "prettier --write .",
 		"lint": "prettier --check .",
 		"test": "svelte-check"
