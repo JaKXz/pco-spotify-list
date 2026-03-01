@@ -47,6 +47,9 @@ importers:
       tailwindcss:
         specifier: ^4.2.1
         version: 4.2.1
+      ts-json-api:
+        specifier: ^1.2.0
+        version: 1.2.0
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -945,6 +948,9 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
 
+  ramda@0.26.1:
+    resolution: {integrity: sha512-hLWjpy7EnsDBb0p+Z3B7rPi3GDeRG5ZtiI33kJhTt+ORCd38AbAIjB/9zRIUoeTbE/AVX5ZkU7m6bznsvrf8eQ==}
+
   readdirp@4.1.2:
     resolution: {integrity: sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==}
     engines: {node: '>= 14.18.0'}
@@ -995,6 +1001,9 @@ packages:
   totalist@3.0.1:
     resolution: {integrity: sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ==}
     engines: {node: '>=6'}
+
+  ts-json-api@1.2.0:
+    resolution: {integrity: sha512-hrH/m9KvidS6gHIfZwH3v/9Jb92CVZvJvFYQrpBDyHhBgWcKa2ol9hPAifEn8u4dpjnvuHG6xZoJgxHfGM5ouw==}
 
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
@@ -1643,6 +1652,8 @@ snapshots:
 
   prettier@3.8.1: {}
 
+  ramda@0.26.1: {}
+
   readdirp@4.1.2: {}
 
   rollup@4.57.1:
@@ -1731,6 +1742,10 @@ snapshots:
       picomatch: 4.0.3
 
   totalist@3.0.1: {}
+
+  ts-json-api@1.2.0:
+    dependencies:
+      ramda: 0.26.1
 
   typescript@5.9.3: {}
 
