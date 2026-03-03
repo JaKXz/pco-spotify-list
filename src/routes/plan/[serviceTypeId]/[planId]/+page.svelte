@@ -2,7 +2,6 @@
 	import { SpotifyApi } from '$lib/spotify-api';
 	import { onMount } from 'svelte';
 	import Track from '$lib/components/Track.svelte';
-	import PcoDescription from '$lib/components/PcoDescription.svelte';
 	import { generatePKCE, storeCodeVerifier } from '$lib/pkce';
 
 	/** @type {{ data: import('./$types').PageData }} */
@@ -18,8 +17,6 @@
 	let playlist = $state(null);
 	let playlistLoading = $state(false);
 	let searchResults = $state({});
-	let planUrl = $state('');
-	let planUrlError = $state('');
 
 	const spotifyApi = new SpotifyApi();
 
@@ -39,7 +36,7 @@
 			scope: 'playlist-modify-public',
 			code_challenge_method: 'S256',
 			code_challenge: codeChallenge,
-			state: '123'
+			state: window.location.pathname
 		});
 
 		window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
@@ -103,9 +100,10 @@
 		playlistLoading = true;
 		error = null;
 		try {
+			const planTitle = data.plan.title || data.plan.dates || 'Plan';
 			const { id, externalUrl } = await spotifyApi.createPlaylist(
-				'Active Songs',
-				`auto generated from the last ~${selected.length} scheduled songs on PCO`
+				planTitle,
+				`songs from the ${data.plan.dates} plan on PCO`
 			);
 			const validUris = selected.filter(
 				(uri) => typeof uri === 'string' && uri.includes('spotify:track:')
@@ -164,16 +162,6 @@
 			}
 		}, 250);
 	}
-
-	function goToPlan() {
-		planUrlError = '';
-		const match = planUrl.match(/service_types\/(\d+)\/plans\/(\d+)/);
-		if (match) {
-			window.location.href = `/plan/${match[1]}/${match[2]}`;
-			return;
-		}
-		planUrlError = 'Could not parse plan URL. Expected format: .../service_types/{id}/plans/{id}';
-	}
 </script>
 
 <main class="mx-auto max-w-3xl px-4 pb-8">
@@ -181,9 +169,8 @@
 	<div class="my-6 rounded-lg border border-green-300 bg-green-50 p-6">
 		<h3 class="text-xl font-semibold">📒 svelte pco x spotify ✨</h3>
 		<p class="mt-2 text-sm text-gray-600">
-			These are songs in "active" rotation that have been scheduled since
-			{data.sixMonthsAgo}. Use the checkboxes to include them in the list that'll be generated in
-			Spotify, or uncheck them and find a different recording as necessary :)
+			Songs from the <strong>{data.plan.dates}</strong> plan. Use the checkboxes to include them in the
+			Spotify playlist, or find a different recording as necessary :)
 		</p>
 
 		{#if isTokenValid && spotifyUser}
@@ -221,33 +208,9 @@
 		{/if}
 	</div>
 
-	<!-- Plan URL input -->
-	<div class="my-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-		<p class="text-sm font-medium text-gray-700">Or make a playlist from a specific plan:</p>
-		<form
-			onsubmit={(e) => {
-				e.preventDefault();
-				goToPlan();
-			}}
-			class="mt-2 flex gap-2"
-		>
-			<input
-				type="text"
-				bind:value={planUrl}
-				placeholder="Paste a PCO plan URL..."
-				class="flex-1 rounded border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
-			/>
-			<button
-				type="submit"
-				class="rounded bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
-			>
-				Go
-			</button>
-		</form>
-		{#if planUrlError}
-			<p class="mt-1 text-xs text-red-600">{planUrlError}</p>
-		{/if}
-	</div>
+	<p class="mb-4 text-sm text-gray-500">
+		<a href="/" class="text-blue-600 underline hover:text-blue-800">← Back to active songs</a>
+	</p>
 
 	<!-- Error display -->
 	{#if error}
@@ -271,8 +234,7 @@
 							<Track item={{ ...song, ...spotifyTracks[index] }}>
 								{#snippet pcoDescription()}
 									<span class="text-xs text-gray-500">
-										PCO data:
-										<PcoDescription {song} maxSongCount={data.maxSongCount} />
+										PCO: {song.title}{song.author ? ` by ${song.author}` : ''}
 									</span>
 								{/snippet}
 							</Track>
@@ -291,14 +253,16 @@
 						</div>
 					{:else if isTokenValid && !loading}
 						<div class="space-y-3">
-							<div>
-								<PcoDescription {song} maxSongCount={data.maxSongCount} />
+							<div class="text-sm text-gray-600">
+								{song.title}{song.author ? ` by ${song.author}` : ''}
 							</div>
 							<label class="block text-sm text-gray-500">
 								Search Spotify for
 								<span class="font-medium text-gray-700">{song.title}</span>
-								by
-								<span class="font-medium text-gray-700">{song.author}</span>:
+								{#if song.author}
+									by
+									<span class="font-medium text-gray-700">{song.author}</span>
+								{/if}:
 								<input
 									type="search"
 									placeholder="Search Spotify..."
@@ -331,12 +295,14 @@
 							{/if}
 						</div>
 					{:else}
-						<PcoDescription {song} maxSongCount={data.maxSongCount} />
+						<div class="text-sm text-gray-600">
+							{song.title}{song.author ? ` by ${song.author}` : ''}
+						</div>
 					{/if}
 				</li>
 			{/each}
 		</ul>
 	{:else}
-		<p class="py-8 text-center text-gray-500">No active songs found.</p>
+		<p class="py-8 text-center text-gray-500">No songs found in this plan.</p>
 	{/if}
 </main>
