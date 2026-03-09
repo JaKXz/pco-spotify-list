@@ -31,7 +31,17 @@ export async function getSongs() {
 		throw new Error('No data found');
 	}
 
-	const songs = data.filter(({ attributes }) => scheduledInWindow(attributes.last_scheduled_at));
+	const seenTitles = new Set();
+	const songs = data.filter(({ attributes }) => {
+		const key = attributes.title.toLowerCase().replaceAll(/[\[\]()\s]+/g, '');
+
+		if (seenTitles.has(key)) {
+			return false;
+		}
+
+		seenTitles.add(key);
+		return scheduledInWindow(attributes.last_scheduled_at);
+	});
 
 	// let next = links.next;
 	// while (typeof next === 'string' && songs.length >= 100) {
@@ -52,26 +62,27 @@ export async function getSongs() {
 			const controller = new AbortController();
 			let timeoutInFlight: ReturnType<typeof setTimeout>;
 
+			const fallback: ResponseWithData<SongSchedule[]> = {
+				meta: { total_count: 2 },
+				data: []
+			};
 			const schedules = await Promise.race([
 				pcoFetch<SongSchedule[]>(
 					`songs/${id}/song_schedules`,
 					{
 						filter: 'before',
-						before: addMonths(new Date(), 3).toISOString(),
+						before: new Date().toISOString(),
 						per_page: 1,
 						order: '-plan_sort_date'
 					},
 					{
 						signal: controller.signal
 					}
-				),
+				).catch(() => fallback),
 				new Promise<ResponseWithData<SongSchedule[]>>((resolve) => {
 					timeoutInFlight = setTimeout(() => {
 						controller.abort();
-						resolve({
-							meta: { total_count: 2 },
-							data: []
-						});
+						resolve(fallback);
 					}, 999);
 				})
 			]);
@@ -97,14 +108,13 @@ export async function getSongs() {
 		})
 	);
 
-	const maxSongCount = songsWithSchedules.length
-		? Math.max(...songsWithSchedules.map((s) => s.schedules.meta.total_count))
-		: 100;
+	const maxSongCount = Math.max(...songsWithSchedules.map((s) => s.schedules.meta.total_count));
 
 	const sixMonthsAgo = addMonths(new Date(), -6).toDateString();
 
 	return {
 		...rest,
+		links,
 		songs: songsWithSchedules
 			.filter(
 				({ schedules }) =>
