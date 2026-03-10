@@ -1,3 +1,4 @@
+import ky from 'ky';
 import type { ResourceObjectOrObjects, Response } from 'ts-json-api';
 
 import { env } from '$env/dynamic/private';
@@ -24,7 +25,7 @@ export async function pcoFetch<T extends ResourceObjectOrObjects>(
 
 	const auth = Buffer.from(`${env.PCO_APP_ID}:${env.PCO_APP_SECRET}`).toString('base64');
 
-	const res = await fetch(url, {
+	const res = await ky(url, {
 		...options,
 		headers: {
 			...options.headers,
@@ -34,12 +35,12 @@ export async function pcoFetch<T extends ResourceObjectOrObjects>(
 	});
 
 	if (!res.ok) {
+		cache.delete(url);
 		throw new Error(
 			`PCO API error: ${res.status} ${res.statusText}\n Headers: ${res.headers}\n ${res.url}`
 		);
 	}
 
-	// trust me bro
 	const apiResponse = await res.json();
 	cacheSet(url, apiResponse);
 	return apiResponse;

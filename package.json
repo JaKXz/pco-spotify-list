@@ -22,6 +22,7 @@
 		"@types/node": "^24.10.13",
 		"@types/spotify-api": "^0.0.25",
 		"@typescript-eslint/types": "^8.56.1",
+		"ky": "^1.14.3",
 		"prettier": "^3.8.1",
 		"prettier-plugin-svelte": "^3.5.1",
 		"prettier-plugin-tailwindcss": "^0.7.2",

@@ -21,6 +21,8 @@ interface SongSchedule extends ResourceObject {
 	};
 }
 
+export type Songs = Awaited<ReturnType<typeof getSongs>>['songs'];
+
 export async function getSongs() {
 	const { data, links, ...rest } = await pcoFetch<Song[]>('songs', {
 		order: '-last_scheduled_at',
@@ -71,8 +73,8 @@ export async function getSongs() {
 					`songs/${id}/song_schedules`,
 					{
 						filter: 'before',
-						before: new Date().toISOString(),
-						per_page: 1,
+						before: addMonths(new Date(), 3).toISOString(),
+						per_page: 5,
 						order: '-plan_sort_date'
 					},
 					{
