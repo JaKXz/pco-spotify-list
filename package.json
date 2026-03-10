@@ -38,6 +38,9 @@
 	"pnpm": {
 		"onlyBuiltDependencies": [
 			"esbuild"
-		]
+		],
+		"patchedDependencies": {
+			"ts-json-api@1.2.0": "patches/ts-json-api@1.2.0.patch"
+		}
 	}
 }
