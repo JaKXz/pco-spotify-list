@@ -24,17 +24,32 @@ interface SongSchedule extends ResourceObject {
 export type Songs = Awaited<ReturnType<typeof getSongs>>['songs'];
 
 export async function getSongs() {
-	const { data, links, ...rest } = await pcoFetch<Song[]>('songs', {
+	let { data: songs, ...rest } = await pcoFetch<Song[]>('songs', {
 		order: '-last_scheduled_at',
 		per_page: 100,
 		'where[hidden]': false
 	});
-	if (!data) {
+	if (!songs) {
 		throw new Error('No data found');
 	}
 
 	const seenTitles = new Set();
-	const songs = data.filter(({ attributes }) => {
+
+	let { next } = rest.links;
+	while (typeof next === 'string' && songs.length >= 100) {
+		const response = await pcoFetch<Song[]>(next.split('/').pop());
+		const filtered = response.data.filter(({ attributes }) =>
+			scheduledInWindow(attributes.last_scheduled_at)
+		);
+		songs.push(...filtered);
+		if (filtered.length < 100) {
+			next = null;
+		} else {
+			next = response.links.next;
+		}
+	}
+
+	songs = songs.filter(({ attributes }) => {
 		const key = attributes.title.toLowerCase().replaceAll(/[\[\]()\s]+/g, '');
 
 		if (seenTitles.has(key)) {
@@ -44,20 +59,6 @@ export async function getSongs() {
 		seenTitles.add(key);
 		return scheduledInWindow(attributes.last_scheduled_at);
 	});
-
-	// let next = links.next;
-	// while (typeof next === 'string' && songs.length >= 100) {
-	// 	const response = await pcoFetch<Song[]>(next.split('/').pop());
-	// 	const filtered = response.data.filter(({ attributes }) =>
-	// 		scheduledInWindow(attributes.last_scheduled_at)
-	// 	);
-	// 	songs.push(...filtered);
-	// 	if (filtered.length < 100) {
-	// 		next = null;
-	// 	} else {
-	// 		next = response.links.next;
-	// 	}
-	// }
 
 	const songsWithSchedules = await Promise.all(
 		songs.map(async ({ attributes, id, ...song }) => {
@@ -116,7 +117,6 @@ export async function getSongs() {
 
 	return {
 		...rest,
-		links,
 		songs: songsWithSchedules
 			.filter(
 				({ schedules }) =>
