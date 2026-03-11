@@ -1,5 +1,5 @@
 import type { ResourceObject, ResponseWithData } from 'ts-json-api';
-import { mapAuthorsToArtistsQuery } from '$lib/artist-mapping';
+import { mapAuthorsToSpotifyQuery } from '$lib/artist-mapping';
 import { addMonths } from '$lib/dates';
 import { pcoFetch } from '$lib/pco/fetch';
 
@@ -103,7 +103,7 @@ export async function getSongs() {
 				schedules,
 				id,
 				lastScheduledShortDates: pastDate,
-				spotifyQuery: mapAuthorsToArtistsQuery({
+				spotifyQuery: mapAuthorsToSpotifyQuery({
 					title: attributes.title,
 					author: attributes.author
 				})

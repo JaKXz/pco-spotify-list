@@ -11,11 +11,8 @@
 /**
  * Generates a cryptographically random string of the given length
  * using characters from the unreserved URI character set (RFC 3986).
- *
- * @param {number} length
- * @returns {string}
  */
-function generateRandomString(length) {
+function generateRandomString(length: number) {
 	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
 	const values = crypto.getRandomValues(new Uint8Array(length));
 	return Array.from(values, (v) => possible[v % possible.length]).join('');
@@ -23,11 +20,8 @@ function generateRandomString(length) {
 
 /**
  * Computes the SHA-256 hash of the input string.
- *
- * @param {string} plain
- * @returns {Promise<ArrayBuffer>}
  */
-async function sha256(plain) {
+async function sha256(plain: string) {
 	const encoder = new TextEncoder();
 	const data = encoder.encode(plain);
 	return crypto.subtle.digest('SHA-256', data);
@@ -35,11 +29,8 @@ async function sha256(plain) {
 
 /**
  * Base64url-encodes an ArrayBuffer (no padding, URL-safe alphabet).
- *
- * @param {ArrayBuffer} buffer
- * @returns {string}
  */
-function base64urlEncode(buffer) {
+function base64urlEncode(buffer: ArrayBuffer) {
 	return btoa(String.fromCharCode(...new Uint8Array(buffer)))
 		.replace(/\+/g, '-')
 		.replace(/\//g, '_')
@@ -49,8 +40,6 @@ function base64urlEncode(buffer) {
 /**
  * Generates a PKCE code_verifier (stored in sessionStorage so it
  * survives the OAuth redirect) and its corresponding code_challenge.
- *
- * @returns {Promise<{ codeVerifier: string, codeChallenge: string }>}
  */
 export async function generatePKCE() {
 	const codeVerifier = generateRandomString(64);
@@ -64,17 +53,13 @@ const STORAGE_KEY = 'spotify_pkce_code_verifier';
 /**
  * Persists the code_verifier in sessionStorage so it can be retrieved
  * after the OAuth redirect.
- *
- * @param {string} codeVerifier
  */
-export function storeCodeVerifier(codeVerifier) {
+export function storeCodeVerifier(codeVerifier: string) {
 	sessionStorage.setItem(STORAGE_KEY, codeVerifier);
 }
 
 /**
  * Retrieves and removes the code_verifier from sessionStorage.
- *
- * @returns {string | null}
  */
 export function retrieveCodeVerifier() {
 	const verifier = sessionStorage.getItem(STORAGE_KEY);
