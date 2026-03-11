@@ -95,7 +95,8 @@ src/
 ├── app.css                          # Tailwind
 ├── routes/
 │   ├── +layout.svelte               # Root layout
-│   ├── +page.server.js              # Server load — fetches PCO songs
+│   ├── +error.svelte                # Error page with app-data reset
+│   ├── +page.server.ts              # Server load
 │   ├── +page.svelte                 # Main page — Spotify matching + UI
 │   └── callback/
 │       └── +page.svelte             # Spotify OAuth callback handler
@@ -103,6 +104,11 @@ src/
 │   ├── components/
 │   │   ├── Track.svelte             # Spotify track display card
 │   │   └── PcoDescription.svelte    # PCO song metadata display
-│   ├── dates.js                     # Date helpers
-│   └── artist-mapping.js            # PCO author → Spotify artist mapping
+│   ├── pco/
+│   │   ├── fetch.ts                 # PCO API client with in-memory TTL cache
+│   │   └── songs.ts                 # Fetches & filters active songs from PCO
+│   ├── artist-mapping.ts            # PCO author → Spotify artist mapping
+│   ├── dates.ts                     # Date helpers
+│   ├── pkce.ts                      # PKCE utilities for Spotify OAuth
+│   └── spotify-api.ts               # Spotify Web API client
 ```
