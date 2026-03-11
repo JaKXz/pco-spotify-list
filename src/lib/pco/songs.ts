@@ -111,10 +111,6 @@ export async function getSongs() {
 		})
 	);
 
-	const maxSongCount = Math.max(...songsWithSchedules.map((s) => s.schedules.meta.total_count));
-
-	const sixMonthsAgo = addMonths(new Date(), -6).toDateString();
-
 	return {
 		...rest,
 		songs: songsWithSchedules
@@ -125,9 +121,7 @@ export async function getSongs() {
 						({ attributes }) => !/christmas/i.test(attributes.service_type_name)
 					)
 			)
-			.toSorted((a, b) => a.schedules.meta.total_count - b.schedules.meta.total_count),
-		maxSongCount,
-		sixMonthsAgo
+			.toSorted((a, b) => a.schedules.meta.total_count - b.schedules.meta.total_count)
 	};
 }
 

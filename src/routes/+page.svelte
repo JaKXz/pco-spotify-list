@@ -1,9 +1,10 @@
 <script>
+	import PcoDescription from '$lib/components/PcoDescription.svelte';
+	import Track from '$lib/components/Track.svelte';
+	import { addMonths } from '$lib/dates';
+	import { generatePKCE, storeCodeVerifier } from '$lib/pkce';
 	import { SpotifyApi } from '$lib/spotify-api';
 	import { onMount } from 'svelte';
-	import Track from '$lib/components/Track.svelte';
-	import PcoDescription from '$lib/components/PcoDescription.svelte';
-	import { generatePKCE, storeCodeVerifier } from '$lib/pkce';
 
 	/** @type {{ data: import('./$types').PageData }} */
 	let { data } = $props();
@@ -170,8 +171,8 @@
 		<h3 class="text-xl font-semibold">📒 svelte pco x spotify ✨</h3>
 		<p class="mt-2 text-sm text-gray-600">
 			These are songs in "active" rotation that have been scheduled since
-			{data.sixMonthsAgo}. Use the checkboxes to include them in the list that'll be generated in
-			Spotify, or uncheck them and find a different recording as necessary :)
+			{addMonths(new Date(), -6)}. Use the checkboxes to include them in the list that'll be
+			generated in Spotify, or uncheck them and find a different recording as necessary :)
 		</p>
 
 		{#if isTokenValid && spotifyUser}
@@ -232,7 +233,7 @@
 								{#snippet pcoDescription()}
 									<span class="text-xs text-gray-500">
 										PCO data:
-										<PcoDescription {song} maxSongCount={data.maxSongCount} />
+										<PcoDescription {song} />
 									</span>
 								{/snippet}
 							</Track>
@@ -252,7 +253,7 @@
 					{:else if isTokenValid && !loading}
 						<div class="space-y-3">
 							<div>
-								<PcoDescription {song} maxSongCount={data.maxSongCount} />
+								<PcoDescription {song} />
 							</div>
 							<label class="block text-sm text-gray-500">
 								Search Spotify for
@@ -291,7 +292,7 @@
 							{/if}
 						</div>
 					{:else}
-						<PcoDescription {song} maxSongCount={data.maxSongCount} />
+						<PcoDescription {song} />
 					{/if}
 				</li>
 			{/each}
