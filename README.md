@@ -21,8 +21,6 @@ Songs are filtered to those in "active" rotation — scheduled in the last 6 mon
 1. **Clone and install**
 
    ```bash
-   git clone <your-repo-url>
-   cd pco-spotify-list
    pnpm install
    ```
 
@@ -49,7 +47,7 @@ Songs are filtered to those in "active" rotation — scheduled in the last 6 mon
    In the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard), add the following Redirect URI to your app:
 
    ```
-   http://localhost:5173/callback
+   http://127.0.0.1:5173/callback
    ```
 
    For production, also add your deployed URL (e.g. `https://your-site.netlify.app/callback`).
@@ -60,7 +58,7 @@ Songs are filtered to those in "active" rotation — scheduled in the last 6 mon
 pnpm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173).
+Open [http://127.0.0.1:5173](http://127.0.0.1:5173).
 
 ## Build
 
@@ -85,7 +83,7 @@ This project uses `@sveltejs/adapter-netlify` and includes a `netlify.toml` conf
 
 - [SvelteKit](https://kit.svelte.dev/) (Svelte 5)
 - [Tailwind CSS](https://tailwindcss.com/) v4
-- [Spotify Web API](https://developer.spotify.com/documentation/web-api/) (via `spotify-web-api-js`)
+- [Spotify Web API](https://developer.spotify.com/documentation/web-api/)
 - [Planning Center API](https://developer.planning.center/docs/)
 - [Netlify](https://www.netlify.com/) (serverless deployment)
 
@@ -94,9 +92,9 @@ This project uses `@sveltejs/adapter-netlify` and includes a `netlify.toml` conf
 ```
 src/
 ├── app.html                         # HTML shell
-├── app.css                          # Tailwind imports
+├── app.css                          # Tailwind
 ├── routes/
-│   ├── +layout.svelte               # Root layout (loads Tailwind)
+│   ├── +layout.svelte               # Root layout
 │   ├── +page.server.js              # Server load — fetches PCO songs
 │   ├── +page.svelte                 # Main page — Spotify matching + UI
 │   └── callback/
@@ -105,7 +103,6 @@ src/
 │   ├── components/
 │   │   ├── Track.svelte             # Spotify track display card
 │   │   └── PcoDescription.svelte    # PCO song metadata display
-│   └── utils/
-│       ├── dates.js                 # Date helpers
-│       └── artist-mapping.js        # PCO author → Spotify artist mapping
+│   ├── dates.js                     # Date helpers
+│   └── artist-mapping.js            # PCO author → Spotify artist mapping
 ```

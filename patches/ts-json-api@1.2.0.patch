@@ -1,0 +1,111 @@
+diff --git a/dist/fp/resourceObjects/attributes.d.ts b/dist/fp/resourceObjects/attributes.d.ts
+index 40a6919cd15ffc0e85b1555cb35d470e3182359f..acd2424b4aa8bc4d942aaea948d341daa2bde600 100644
+--- a/dist/fp/resourceObjects/attributes.d.ts
++++ b/dist/fp/resourceObjects/attributes.d.ts
+@@ -1,7 +1,6 @@
+ /**
+  * Attribute-related functions. Only applies to a single Resource Object.
+  */
+-/// <reference types="ts-toolbelt" />
+ import { Attributes, ResourceObject } from '../../types';
+ /**
+  * Return all attributes.
+@@ -15,14 +14,14 @@ export declare const attributes: (resourceObject: ResourceObject) => Attributes
+  * @param attributeName
+  * @param resourceObject
+  */
+-export declare const attribute: import("Function/Curry").Curry<(attributeName: string, resourceObject: ResourceObject) => any>;
++export declare const attribute: (attributeName: string, resourceObject: ResourceObject) => any;
+ /**
+  * Return a single Attribute value, with a default fallback.
+  *
+  * @param attributeName
+  * @param resourceObject
+  */
+-export declare const attributeOr: import("Function/Curry").Curry<(defaultValue: any, attributeName: string, resourceObject: ResourceObject) => any>;
++export declare const attributeOr: (defaultValue: any, attributeName: string, resourceObject: ResourceObject) => any;
+ /**
+  * Set the value of an attribute.
+  *
+@@ -30,11 +29,11 @@ export declare const attributeOr: import("Function/Curry").Curry<(defaultValue:
+  * @param attributeName
+  * @param resourceObject
+  */
+-export declare const setAttribute: import("Function/Curry").Curry<(attributeName: string, value: any, resourceObject: ResourceObject) => ResourceObject>;
++export declare const setAttribute: (attributeName: string, value: any, resourceObject: ResourceObject) => ResourceObject;
+ /**
+  * Update the attributes of the Resource Object
+  *
+  * @param payload
+  * @param resourceObject
+  */
+-export declare const updateAttributes: import("Function/Curry").Curry<(payload: Attributes | undefined, resourceObject: ResourceObject) => ResourceObject>;
++export declare const updateAttributes: (payload: Attributes | undefined, resourceObject: ResourceObject) => ResourceObject;
+diff --git a/dist/fp/resourceObjects/relationships.d.ts b/dist/fp/resourceObjects/relationships.d.ts
+index 3f48e1604dc307b357988b13c656aa2fa6a53a7d..b86fb892165e83fc751fdcb597392f7a220490a1 100644
+--- a/dist/fp/resourceObjects/relationships.d.ts
++++ b/dist/fp/resourceObjects/relationships.d.ts
+@@ -1,4 +1,3 @@
+-/// <reference types="ts-toolbelt" />
+ import { ResourceObject } from '../../types';
+ /**
+  * Return all relationships
+@@ -12,14 +11,14 @@ export declare const relationships: (resourceObject: ResourceObject) => unknown;
+  * @param relationshipName
+  * @param resourceObject
+  */
+-export declare const relationship: import("Function/Curry").Curry<(relationshipName: string, resourceObject: ResourceObject) => any>;
++export declare const relationship: (relationshipName: string, resourceObject: ResourceObject) => any;
+ /**
+  * Return a single Relationship value
+  *
+  * @param relationshipName
+  * @param resourceObject
+  */
+-export declare const relationshipData: import("Function/Curry").Curry<(relationshipName: string, resourceObject: ResourceObject) => any>;
++export declare const relationshipData: (relationshipName: string, resourceObject: ResourceObject) => any;
+ /**
+  * Add a relationship to the Resource Object by type and id
+  *
+@@ -28,7 +27,7 @@ export declare const relationshipData: import("Function/Curry").Curry<(relations
+  * @param id
+  * @param resourceObject
+  */
+-export declare const addRelationship: import("Function/Curry").Curry<(relationshipName: string, type: string, id: string, resourceObject: ResourceObject) => ResourceObject>;
++export declare const addRelationship: (relationshipName: string, type: string, id: string, resourceObject: ResourceObject) => ResourceObject;
+ /**
+  * Removes a relationship from the Resource Object
+  *
+@@ -36,7 +35,7 @@ export declare const addRelationship: import("Function/Curry").Curry<(relationsh
+  * @param id
+  * @param resourceObject
+  */
+-export declare const removeRelationship: import("Function/Curry").Curry<(type: string, id: string, resourceObject: ResourceObject) => ResourceObject>;
++export declare const removeRelationship: (type: string, id: string, resourceObject: ResourceObject) => ResourceObject;
+ /**
+  * Set a to-one relationship to the given type and id
+  *
+@@ -45,4 +44,4 @@ export declare const removeRelationship: import("Function/Curry").Curry<(type: s
+  * @param id
+  * @param resourceObject
+  */
+-export declare const setRelationship: import("Function/Curry").Curry<(relationship: string, type: string, id: string, resourceObject: ResourceObject) => ResourceObject>;
++export declare const setRelationship: (relationship: string, type: string, id: string, resourceObject: ResourceObject) => ResourceObject;
+diff --git a/dist/utils.d.ts b/dist/utils.d.ts
+index ff76e1c9d05788812fc79548ae751683380e5816..41e00b53cceaf4f595fc0ebee0d766301f9b1c56 100644
+--- a/dist/utils.d.ts
++++ b/dist/utils.d.ts
+@@ -1,4 +1,3 @@
+-/// <reference types="ts-toolbelt" />
+ /**
+  * A predicate that determines if the provided value is defined
+  *
+@@ -10,7 +9,7 @@ export declare const isDefined: (item: any) => boolean;
+  * useful for merging small data sets into larger
+  * data collections
+  */
+-export declare const mergeReverse: (arg1: unknown, arg0?: object | undefined) => <O2 extends object>(b: O2) => import("Object/MergeUp").MergeUpFlat<import("List/ObjectOf").ObjectOf<O2>, object, 1, import("Object/OptionalKeys").OptionalKeys<import("List/ObjectOf").ObjectOf<O2>>>;
++export declare const mergeReverse: (arg1: unknown, arg0?: object | undefined) => <O2 extends object>(b: O2) => object;
+ /**
+  * Determines if the provided Resource Object has the given ID
+  *

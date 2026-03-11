@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  ts-json-api@1.2.0:
+    hash: 4fc655bd5127544af07b8b91892a36450b102f9bde695289b643b9bef0b3b80a
+    path: patches/ts-json-api@1.2.0.patch
+
 importers:
 
   .:
@@ -29,6 +34,9 @@ importers:
       '@typescript-eslint/types':
         specifier: ^8.56.1
         version: 8.56.1
+      ky:
+        specifier: ^1.14.3
+        version: 1.14.3
       prettier:
         specifier: ^3.8.1
         version: 3.8.1
@@ -47,6 +55,9 @@ importers:
       tailwindcss:
         specifier: ^4.2.1
         version: 4.2.1
+      ts-json-api:
+        specifier: ^1.2.0
+        version: 1.2.0(patch_hash=4fc655bd5127544af07b8b91892a36450b102f9bde695289b643b9bef0b3b80a)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -772,6 +783,10 @@ packages:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
     engines: {node: '>=6'}
 
+  ky@1.14.3:
+    resolution: {integrity: sha512-9zy9lkjac+TR1c2tG+mkNSVlyOpInnWdSMiue4F+kq8TwJSgv6o8jhLRg8Ho6SnZ9wOYUq/yozts9qQCfk7bIw==}
+    engines: {node: '>=18'}
+
   lightningcss-android-arm64@1.31.1:
     resolution: {integrity: sha512-HXJF3x8w9nQ4jbXRiNppBCqeZPIAfUo8zE/kOEGbW5NZvGc/K7nMxbhIr+YlFlHW5mpbg/YFPdbnCh1wAXCKFg==}
     engines: {node: '>= 12.0.0'}
@@ -945,6 +960,9 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
 
+  ramda@0.26.1:
+    resolution: {integrity: sha512-hLWjpy7EnsDBb0p+Z3B7rPi3GDeRG5ZtiI33kJhTt+ORCd38AbAIjB/9zRIUoeTbE/AVX5ZkU7m6bznsvrf8eQ==}
+
   readdirp@4.1.2:
     resolution: {integrity: sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==}
     engines: {node: '>= 14.18.0'}
@@ -995,6 +1013,9 @@ packages:
   totalist@3.0.1:
     resolution: {integrity: sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ==}
     engines: {node: '>=6'}
+
+  ts-json-api@1.2.0:
+    resolution: {integrity: sha512-hrH/m9KvidS6gHIfZwH3v/9Jb92CVZvJvFYQrpBDyHhBgWcKa2ol9hPAifEn8u4dpjnvuHG6xZoJgxHfGM5ouw==}
 
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
@@ -1557,6 +1578,8 @@ snapshots:
 
   kleur@4.1.5: {}
 
+  ky@1.14.3: {}
+
   lightningcss-android-arm64@1.31.1:
     optional: true
 
@@ -1642,6 +1665,8 @@ snapshots:
       prettier-plugin-svelte: 3.5.1(prettier@3.8.1)(svelte@5.53.7)
 
   prettier@3.8.1: {}
+
+  ramda@0.26.1: {}
 
   readdirp@4.1.2: {}
 
@@ -1731,6 +1756,10 @@ snapshots:
       picomatch: 4.0.3
 
   totalist@3.0.1: {}
+
+  ts-json-api@1.2.0(patch_hash=4fc655bd5127544af07b8b91892a36450b102f9bde695289b643b9bef0b3b80a):
+    dependencies:
+      ramda: 0.26.1
 
   typescript@5.9.3: {}
 
