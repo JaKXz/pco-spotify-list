@@ -28,7 +28,8 @@ export async function getSongs() {
 	let { data: songs, ...rest } = await pcoFetch<Song[]>('songs', {
 		order: '-last_scheduled_at',
 		per_page: 100,
-		'where[hidden]': false
+		'where[hidden]': false,
+		'where[last_scheduled_at][gte]': addMonths(new Date(), -6).toISOString()
 	});
 	if (!songs) {
 		throw new Error('No data found');
@@ -108,9 +109,7 @@ export async function getSongs() {
 			.filter(
 				({ schedules }) =>
 					schedules.meta?.total_count > 1 &&
-					schedules.data?.every(
-						({ attributes }) => !/christmas/i.test(attributes.service_type_name)
-					)
+					schedules.data?.some(({ attributes }) => attributes.service_type_name.includes('Campus'))
 			)
 			.toSorted((a, b) => a.schedules.meta.total_count - b.schedules.meta.total_count)
 	};
