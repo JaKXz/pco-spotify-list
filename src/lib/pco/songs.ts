@@ -1,7 +1,8 @@
-import type { ResourceObject, ResponseWithData } from 'ts-json-api';
 import { mapAuthorsToSpotifyQuery } from '$lib/artist-mapping';
+import { batchAsync } from '$lib/batch-async';
 import { addMonths } from '$lib/dates';
 import { pcoFetch } from '$lib/pco/fetch';
+import type { ResourceObject, ResponseWithData } from 'ts-json-api';
 
 interface Song extends ResourceObject {
 	attributes: {
@@ -60,56 +61,46 @@ export async function getSongs() {
 		return scheduledInWindow(attributes.last_scheduled_at);
 	});
 
-	const songsWithSchedules = await Promise.all(
-		songs.map(async ({ attributes, id, ...song }) => {
-			const controller = new AbortController();
-			let timeoutInFlight: ReturnType<typeof setTimeout>;
-
-			const fallback: ResponseWithData<SongSchedule[]> = {
+	const songsWithSchedules = await batchAsync(songs, async ({ attributes, id, ...song }) => {
+		const schedules = await pcoFetch<SongSchedule[]>(
+			`songs/${id}/song_schedules`,
+			{
+				filter: 'before',
+				before: addMonths(new Date(), 3).toISOString(),
+				per_page: 5,
+				order: '-plan_sort_date'
+			},
+			{
+				timeout: 5000,
+				retry: {
+					limit: 3,
+					retryOnTimeout: true
+				}
+			}
+		).catch(
+			(): ResponseWithData<SongSchedule[]> => ({
 				meta: { total_count: 2 },
 				data: []
-			};
-			const schedules = await Promise.race([
-				pcoFetch<SongSchedule[]>(
-					`songs/${id}/song_schedules`,
-					{
-						filter: 'before',
-						before: addMonths(new Date(), 3).toISOString(),
-						per_page: 5,
-						order: '-plan_sort_date'
-					},
-					{
-						signal: controller.signal
-					}
-				).catch(() => fallback),
-				new Promise<ResponseWithData<SongSchedule[]>>((resolve) => {
-					timeoutInFlight = setTimeout(() => {
-						controller.abort();
-						resolve(fallback);
-					}, 999);
-				})
-			]);
+			})
+		);
 
-			clearTimeout(timeoutInFlight);
+		const pastDate =
+			new Date(attributes.last_scheduled_at) < new Date()
+				? attributes.last_scheduled_short_dates
+				: schedules.data[0]?.attributes.plan_dates;
 
-			const pastDate =
-				new Date(attributes.last_scheduled_at) < new Date()
-					? attributes.last_scheduled_short_dates
-					: schedules.data[0]?.attributes.plan_dates;
-
-			return {
-				...song,
-				...attributes,
-				schedules,
-				id,
-				lastScheduledShortDates: pastDate,
-				spotifyQuery: mapAuthorsToSpotifyQuery({
-					title: attributes.title,
-					author: attributes.author
-				})
-			};
-		})
-	);
+		return {
+			...song,
+			...attributes,
+			schedules,
+			id,
+			lastScheduledShortDates: pastDate,
+			spotifyQuery: mapAuthorsToSpotifyQuery({
+				title: attributes.title,
+				author: attributes.author
+			})
+		};
+	});
 
 	return {
 		...rest,
