@@ -1,4 +1,5 @@
 <script>
+	import { batchAsync } from '$lib/batch-async';
 	import PcoDescription from '$lib/components/PcoDescription.svelte';
 	import Track from '$lib/components/Track.svelte';
 	import { addMonths } from '$lib/dates';
@@ -60,16 +61,14 @@
 			spotifyApi.setAccessToken(spotifyToken);
 			spotifyUser = await spotifyApi.getMe();
 
-			const results = await Promise.all(
-				data.songs.map((song) =>
-					spotifyApi
-						.searchTracks(song.spotifyQuery, { limit: 1 })
-						.catch(() => ({ tracks: { items: [] } }))
-				)
+			const results = await batchAsync(data.songs, (song) =>
+				spotifyApi
+					.searchTracks(song.spotifyQuery, { limit: 1 })
+					.catch(() => ({ tracks: { items: [] } }))
 			);
 
 			spotifyTracks = results.map(({ tracks }) => {
-				if (tracks.items.length) {
+				if (tracks.items?.length) {
 					const { external_urls, album, artists, ...rest } = tracks.items[0];
 					return {
 						...rest,
