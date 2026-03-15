@@ -2,7 +2,7 @@
 	import { batchAsync } from '$lib/batch-async';
 	import PcoDescription from '$lib/components/PcoDescription.svelte';
 	import Track from '$lib/components/Track.svelte';
-	import { addMonths } from '$lib/dates';
+	import { MAX_PAST_WINDOW } from '$lib/dates';
 	import { generatePKCE, storeCodeVerifier } from '$lib/pkce';
 	import { SpotifyApi } from '$lib/spotify-api';
 	import { onMount } from 'svelte';
@@ -170,8 +170,8 @@
 		<h3 class="text-xl font-semibold">📒 svelte pco x spotify ✨</h3>
 		<p class="mt-2 text-sm text-gray-600">
 			These are songs in "active" rotation that have been scheduled since
-			{addMonths(new Date(), -6)}. Use the checkboxes to include them in the list that'll be
-			generated in Spotify, or uncheck them and find a different recording as necessary :)
+			{MAX_PAST_WINDOW.toLocaleDateString()}. Use the checkboxes to include them in the list that'll
+			be generated in Spotify, or uncheck them and find a different recording as necessary :)
 		</p>
 
 		{#if isTokenValid && spotifyUser}

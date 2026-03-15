@@ -1,6 +1,6 @@
 import { mapAuthorsToSpotifyQuery } from '$lib/artist-mapping';
 import { batchAsync } from '$lib/batch-async';
-import { addMonths } from '$lib/dates';
+import { MAX_FUTURE_WINDOW, MAX_PAST_WINDOW } from '$lib/dates';
 import { pcoFetch } from '$lib/pco/fetch';
 import type { ResourceObject, ResponseWithData } from 'ts-json-api';
 
@@ -29,7 +29,7 @@ export async function getSongs() {
 		order: '-last_scheduled_at',
 		per_page: 100,
 		'where[hidden]': false,
-		'where[last_scheduled_at][gte]': addMonths(new Date(), -6).toISOString()
+		'where[last_scheduled_at][gte]': MAX_PAST_WINDOW.toISOString()
 	});
 	if (!songs) {
 		throw new Error('No data found');
@@ -67,7 +67,7 @@ export async function getSongs() {
 			`songs/${id}/song_schedules`,
 			{
 				filter: 'before',
-				before: addMonths(new Date(), 3).toISOString(),
+				before: MAX_FUTURE_WINDOW.toISOString(),
 				per_page: 5,
 				order: '-plan_sort_date'
 			},
@@ -85,17 +85,11 @@ export async function getSongs() {
 			})
 		);
 
-		const pastDate =
-			new Date(attributes.last_scheduled_at) < new Date()
-				? attributes.last_scheduled_short_dates
-				: schedules.data[0]?.attributes.plan_dates;
-
 		return {
 			...song,
 			...attributes,
 			schedules,
 			id,
-			lastScheduledShortDates: pastDate,
 			spotifyQuery: mapAuthorsToSpotifyQuery({
 				title: attributes.title,
 				author: attributes.author
@@ -116,5 +110,5 @@ export async function getSongs() {
 }
 
 function scheduledInWindow(date: string) {
-	return new Date(date) > addMonths(new Date(), -6);
+	return new Date(date) > MAX_PAST_WINDOW;
 }
