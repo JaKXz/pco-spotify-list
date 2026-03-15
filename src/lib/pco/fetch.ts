@@ -1,4 +1,4 @@
-import ky from 'ky';
+import ky, { type Options } from 'ky';
 import type { ResourceObjectOrObjects, Response } from 'ts-json-api';
 
 import { env } from '$env/dynamic/private';
@@ -8,7 +8,7 @@ const PCO_API_URL = 'https://api.planningcenteronline.com/services/v2';
 export async function pcoFetch<T extends ResourceObjectOrObjects>(
 	endpoint: string,
 	params = {},
-	options: RequestInit = {}
+	options: Options = {}
 ): Promise<Response<T>> {
 	if (!env.PCO_APP_ID || !env.PCO_APP_SECRET) {
 		throw new Error(

@@ -1,3 +1,5 @@
+import ky, { type Options } from 'ky';
+
 export class SpotifyApi {
 	#url = 'https://api.spotify.com/v1/';
 	token = '';
@@ -40,7 +42,7 @@ export class SpotifyApi {
 
 		return this.#makeRequest<CreatePlaylistResponseSubset>('me/playlists', {
 			method: 'POST',
-			body: JSON.stringify({ name, description })
+			json: { name, description }
 		}).then(({ id, external_urls }) => ({
 			id,
 			externalUrl: external_urls.spotify
@@ -56,7 +58,7 @@ export class SpotifyApi {
 	): Promise<Pick<SpotifyApi.PlaylistBaseObject, 'snapshot_id'>> {
 		return this.#makeRequest(`playlists/${id}/items`, {
 			method: 'POST',
-			body: JSON.stringify({ uris })
+			json: { uris }
 		});
 	}
 
@@ -78,15 +80,15 @@ export class SpotifyApi {
 		return this.#makeRequest(`search?${params}`);
 	}
 
-	#makeRequest<T = unknown>(endpoint: string, options: RequestInit = {}): Promise<T> {
+	#makeRequest<T = unknown>(endpoint: string, options: Options = {}): Promise<T> {
 		if (!this.token) {
 			throw new Error('Unauthorized');
 		}
 
-		return fetch(`${this.#url}${endpoint}`, {
+		return ky(`${this.#url}${endpoint}`, {
 			...options,
 			headers: {
-				...(options.method === 'POST' && { 'Content-Type': 'application/json' }),
+				...options.headers,
 				Authorization: `Bearer ${this.token}`
 			}
 		}).then((response) => response.json());

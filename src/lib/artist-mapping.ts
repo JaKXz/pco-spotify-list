@@ -1,9 +1,3 @@
-/**
- * Maps PCO song authors to Spotify-searchable artist names.
- * This logic helps bridge the gap between how authors are credited
- * in Planning Center vs. how artists are listed on Spotify.
- */
-
 const HILLSONG_AUTHORS = [
 	'Brooke Fraser',
 	'Ligertwood',
@@ -16,11 +10,7 @@ const HILLSONG_AUTHORS = [
 
 const BETHEL_AUTHORS = ['McClure', 'Helser', 'Jenn Johnson', 'Brian Johnson'];
 
-/**
- * @param {string[]} authors
- * @returns {(opts: { author: string }) => boolean}
- */
-function checkAuthors(authors) {
+function checkAuthors(authors: string[]) {
 	const check = new RegExp(authors.join('|'));
 	return ({ author }) => check.test(author);
 }
@@ -28,14 +18,13 @@ function checkAuthors(authors) {
 const isHillsong = checkAuthors(HILLSONG_AUTHORS);
 const isBethel = checkAuthors(BETHEL_AUTHORS);
 
-/**
- * Takes a PCO song's title and author and returns a search query
- * string suitable for Spotify's search API.
- *
- * @param {{ title: string, author?: string | null }} song
- * @returns {string}
- */
-export function mapAuthorsToArtistsQuery({ title, author }) {
+export function mapAuthorsToSpotifyQuery({
+	title,
+	author
+}: {
+	title: string;
+	author?: string | null;
+}) {
 	if (author == null) {
 		return title;
 	}
