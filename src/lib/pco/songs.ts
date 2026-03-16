@@ -4,7 +4,7 @@ import { MAX_FUTURE_WINDOW, MAX_PAST_WINDOW } from '$lib/dates';
 import { pcoFetch } from '$lib/pco/fetch';
 import type { ResourceObject, ResponseWithData } from 'ts-json-api';
 
-interface Song extends ResourceObject {
+export interface Song extends ResourceObject {
 	attributes: {
 		title: string;
 		author: string;
@@ -31,7 +31,7 @@ export async function getSongs() {
 		'where[hidden]': false,
 		'where[last_scheduled_at][gte]': MAX_PAST_WINDOW.toISOString()
 	});
-	if (!songs) {
+	if (!songs || !songs.length) {
 		throw new Error('No data found');
 	}
 
