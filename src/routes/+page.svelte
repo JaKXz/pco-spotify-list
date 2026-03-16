@@ -4,7 +4,7 @@
 	import Track from '$lib/components/Track.svelte';
 	import { MAX_PAST_WINDOW } from '$lib/dates';
 	import { generatePKCE, storeCodeVerifier } from '$lib/pkce';
-	import { SpotifyApi } from '$lib/spotify-api';
+	import { spotifyApi } from '$lib/spotify-api';
 	import { onMount } from 'svelte';
 
 	/** @type {{ data: import('./$types').PageData }} */
@@ -20,8 +20,6 @@
 	let playlist = $state(null);
 	let playlistLoading = $state(false);
 	let searchResults = $state({});
-
-	const spotifyApi = new SpotifyApi();
 
 	const isTokenValid = $derived(
 		!!spotifyToken && !!spotifyTokenExpiry && spotifyTokenExpiry > Date.now()
