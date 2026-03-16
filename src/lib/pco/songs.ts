@@ -4,7 +4,7 @@ import { MAX_FUTURE_WINDOW, MAX_PAST_WINDOW } from '$lib/dates';
 import { pcoFetch } from '$lib/pco/fetch';
 import type { ResourceObject, ResponseWithData } from 'ts-json-api';
 
-export interface Song extends ResourceObject {
+export interface SongSubset extends ResourceObject {
 	attributes: {
 		title: string;
 		author: string;
@@ -25,7 +25,7 @@ interface SongSchedule extends ResourceObject {
 export type Songs = Awaited<ReturnType<typeof getSongs>>['songs'];
 
 export async function getSongs() {
-	let { data: songs, ...rest } = await pcoFetch<Song[]>('songs', {
+	let { data: songs, ...rest } = await pcoFetch<SongSubset[]>('songs', {
 		order: '-last_scheduled_at',
 		per_page: 100,
 		'where[hidden]': false,
@@ -39,7 +39,7 @@ export async function getSongs() {
 
 	let { next } = rest.links;
 	while (typeof next === 'string' && songs.length >= 100) {
-		const response = await pcoFetch<Song[]>(next.split('/').pop());
+		const response = await pcoFetch<SongSubset[]>(next.split('/').pop());
 		const filtered = response.data.filter(({ attributes }) =>
 			scheduledInWindow(attributes.last_scheduled_at)
 		);

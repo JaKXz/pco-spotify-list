@@ -1,6 +1,6 @@
 import { mapAuthorsToSpotifyQuery } from '$lib/artist-mapping';
 import { pcoFetch } from '$lib/pco/fetch';
-import type { Song } from '$lib/pco/songs';
+import type { SongSubset, Songs } from '$lib/pco/songs';
 import { error } from '@sveltejs/kit';
 import type { ResourceObject } from 'ts-json-api';
 import type { PageServerLoad } from './$types';
@@ -70,8 +70,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		error(404, `Plan ${planId} not found in any service type`);
 	}
 
-	// Fetch plan items with included songs
-	const itemsResponse = await pcoFetch<PlanItem[]>(
+	const { included } = await pcoFetch<PlanItem[]>(
 		`service_types/${serviceTypeId}/plans/${planId}/items`,
 		{
 			include: 'song',
@@ -79,55 +78,31 @@ export const load: PageServerLoad = async ({ params }) => {
 		}
 	);
 
-	const items = itemsResponse.data ?? [];
-
-	// Build a lookup of included songs by ID
-	const includedSongs = new Map<string, Song>();
-	if (Array.isArray(itemsResponse.included)) {
-		for (const inc of itemsResponse.included) {
-			if (isSong(inc)) {
-				includedSongs.set(inc.id, inc);
-			}
-		}
-	}
-
 	// Filter to only song items and map to the shape TrackList expects
-	const songs = items
-		.filter((item) => item.attributes.item_type === 'song')
-		.map((item) => {
-			const songId = item.relationships?.song?.data?.id;
-			const song = songId ? includedSongs.get(songId) : null;
-
-			const title = song?.attributes.title ?? item.attributes.title;
-			const author = song?.attributes.author ?? '';
-			const lastScheduledAt = plan.attributes.sort_date;
-			const lastScheduledShortDates = plan.attributes.short_dates ?? plan.attributes.dates;
-
-			return {
-				id: song?.id ?? item.id,
-				type: song?.type ?? item.type,
-				title,
-				author,
-				copyright: song?.attributes.copyright ?? undefined,
-				last_scheduled_at: lastScheduledAt,
-				last_scheduled_short_dates: lastScheduledShortDates,
-				spotifyQuery: mapAuthorsToSpotifyQuery({ title, author }),
-				schedules: {
-					meta: { total_count: 1 },
-					data: [
-						{
-							id: planId,
-							type: 'SongSchedule',
-							attributes: {
-								plan_sort_date: plan!.attributes.sort_date,
-								service_type_name: serviceTypeName,
-								plan_dates: plan!.attributes.dates
-							}
+	const songs: Songs = included.map((item: SongSubset) => {
+		return {
+			...item,
+			...item.attributes,
+			spotifyQuery: mapAuthorsToSpotifyQuery({
+				title: item.attributes.title,
+				author: item.attributes.author
+			}),
+			schedules: {
+				meta: { total_count: 1 },
+				data: [
+					{
+						id: planId,
+						type: 'SongSchedule',
+						attributes: {
+							plan_sort_date: plan.attributes.sort_date,
+							service_type_name: serviceTypeName,
+							plan_dates: plan.attributes.dates
 						}
-					]
-				}
-			};
-		});
+					}
+				]
+			}
+		};
+	});
 
 	// Fetch adjacent plans for prev/next navigation
 	const [prevPlan, nextPlan] = await Promise.all([
@@ -165,7 +140,3 @@ export const load: PageServerLoad = async ({ params }) => {
 			: null
 	};
 };
-
-function isSong(item: ResourceObject): item is Song {
-	return item.type === 'Song';
-}
