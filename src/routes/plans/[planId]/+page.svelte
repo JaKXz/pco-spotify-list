@@ -1,7 +1,7 @@
 <script lang="ts">
 	import TrackList from '$lib/components/TrackList.svelte';
-	/** @type {{ data: import('./$types').PageData }} */
-	const { data } = $props();
+	import type { PageProps } from './$types';
+	const { data, params }: PageProps = $props();
 </script>
 
 <div class="mx-auto max-w-3xl px-4 pt-4">
@@ -21,7 +21,7 @@
 				href="/plans/{data.prevPlan.id}"
 				class="inline-flex items-center gap-1 rounded border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
 			>
-				← <span class="max-w-[10rem] truncate">{data.prevPlan.title}</span>
+				← <span class="max-w-40 truncate">{data.prevPlan.title}</span>
 			</a>
 		{:else}
 			<span></span>
@@ -32,7 +32,7 @@
 				href="/plans/{data.nextPlan.id}"
 				class="inline-flex items-center gap-1 rounded border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
 			>
-				<span class="max-w-[10rem] truncate">{data.nextPlan.title}</span> →
+				<span class="max-w-40 truncate">{data.nextPlan.title}</span> →
 			</a>
 		{:else}
 			<span></span>
@@ -40,4 +40,6 @@
 	</nav>
 </div>
 
-<TrackList {data} />
+{#key params.planId}
+	<TrackList {data} />
+{/key}
