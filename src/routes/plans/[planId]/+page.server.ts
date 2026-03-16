@@ -129,6 +129,20 @@ export const load: PageServerLoad = async ({ params }) => {
 			};
 		});
 
+	// Fetch adjacent plans for prev/next navigation
+	const [prevPlan, nextPlan] = await Promise.all([
+		pcoFetch<Plan>(
+			plan.links.previous_plan
+				.toString()
+				.replace('https://api.planningcenteronline.com/services/v2/', '')
+		).catch(() => null),
+		pcoFetch<Plan>(
+			plan.links.next_plan
+				.toString()
+				.replace('https://api.planningcenteronline.com/services/v2/', '')
+		).catch(() => null)
+	]);
+
 	return {
 		songs,
 		plan: {
@@ -136,7 +150,19 @@ export const load: PageServerLoad = async ({ params }) => {
 			title: plan.attributes.title ?? plan.attributes.dates,
 			dates: plan.attributes.dates,
 			serviceTypeName
-		}
+		},
+		prevPlan: prevPlan
+			? {
+					id: prevPlan.data.id,
+					title: prevPlan.data.attributes.title ?? prevPlan.data.attributes.dates
+				}
+			: null,
+		nextPlan: nextPlan
+			? {
+					id: nextPlan.data.id,
+					title: nextPlan.data.attributes.title ?? nextPlan.data.attributes.dates
+				}
+			: null
 	};
 };
 
