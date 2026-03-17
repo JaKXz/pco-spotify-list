@@ -78,33 +78,29 @@ export const load: PageServerLoad = async ({ params }) => {
 		}
 	);
 
-	// Filter to only song items and map to the shape TrackList expects
-	const songs: Songs = included.map((item: SongSubset) => {
-		return {
-			...item,
-			...item.attributes,
-			spotifyQuery: mapAuthorsToSpotifyQuery({
-				title: item.attributes.title,
-				author: item.attributes.author
-			}),
-			schedules: {
-				meta: { total_count: 1 },
-				data: [
-					{
-						id: planId,
-						type: 'SongSchedule',
-						attributes: {
-							plan_sort_date: plan.attributes.sort_date,
-							service_type_name: serviceTypeName,
-							plan_dates: plan.attributes.dates
-						}
+	const songs: Songs = included.map((item: SongSubset) => ({
+		...item,
+		...item.attributes,
+		spotifyQuery: mapAuthorsToSpotifyQuery({
+			title: item.attributes.title,
+			author: item.attributes.author
+		}),
+		schedules: {
+			meta: { total_count: 1 },
+			data: [
+				{
+					id: planId,
+					type: 'SongSchedule',
+					attributes: {
+						plan_sort_date: plan.attributes.sort_date,
+						service_type_name: serviceTypeName,
+						plan_dates: plan.attributes.dates
 					}
-				]
-			}
-		};
-	});
+				}
+			]
+		}
+	}));
 
-	// Fetch adjacent plans for prev/next navigation
 	const [prevPlan, nextPlan] = await Promise.all([
 		pcoFetch<Plan>(
 			plan.links.previous_plan
@@ -122,7 +118,6 @@ export const load: PageServerLoad = async ({ params }) => {
 		songs,
 		plan: {
 			...plan,
-			id: plan.id,
 			title: plan.attributes.title ?? plan.attributes.dates,
 			dates: plan.attributes.dates,
 			serviceTypeName
