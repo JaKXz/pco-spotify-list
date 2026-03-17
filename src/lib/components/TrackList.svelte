@@ -100,15 +100,15 @@
 		playlistLoading = true;
 		error = null;
 		try {
-			const { id, externalUrl } = await spotifyApi.createPlaylist(
-				playlistName,
-				playlistDescription ||
-					`auto generated from the last ~${selected.length} scheduled songs on PCO`
-			);
 			const validUris = selected.filter(
 				(uri) => typeof uri === 'string' && uri.includes('spotify:track:')
 			);
 			if (validUris.length) {
+				const { id, externalUrl } = await spotifyApi.createPlaylist(
+					playlistName,
+					playlistDescription ||
+						`auto generated from the last ~${selected.length} scheduled songs on PCO`
+				);
 				await spotifyApi.addTracksToPlaylist(id, validUris);
 				return externalUrl;
 			} else {
