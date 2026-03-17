@@ -7,7 +7,13 @@
 	import { spotifyApi } from '$lib/spotify-api';
 	import { onMount } from 'svelte';
 
-	let { data, headerText = null, emptyText = null } = $props();
+	let {
+		data,
+		headerText = null,
+		emptyText = null,
+		playlistName = 'Active Songs',
+		playlistDescription = null
+	} = $props();
 
 	let spotifyToken = $state(null);
 	let spotifyTokenExpiry = $state(null);
@@ -98,16 +104,19 @@
 		error = null;
 		try {
 			const { id, externalUrl } = await spotifyApi.createPlaylist(
-				'Active Songs',
-				`auto generated from the last ~${selected.length} scheduled songs on PCO`
+				playlistName,
+				playlistDescription ||
+					`auto generated from the last ~${selected.length} scheduled songs on PCO`
 			);
 			const validUris = selected.filter(
 				(uri) => typeof uri === 'string' && uri.includes('spotify:track:')
 			);
 			if (validUris.length) {
 				await spotifyApi.addTracksToPlaylist(id, validUris);
+				return externalUrl;
+			} else {
+				error = 'No tracks selected to make a playlist.';
 			}
-			return externalUrl;
 		} catch (err) {
 			error = err.message;
 		} finally {
@@ -178,7 +187,7 @@
 					{playlistLoading ? 'Creating...' : 'Make the playlist!'}
 				</button>
 			</div>
-			{#if playlist}
+			{#if playlist && !error}
 				{#await playlist then url}
 					<a
 						href={url}
