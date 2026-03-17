@@ -1,13 +1,13 @@
 <script>
 	import { batchAsync } from '$lib/batch-async';
 	import PcoDescription from '$lib/components/PcoDescription.svelte';
+	import Spinner from '$lib/components/Spinner.svelte';
 	import Track from '$lib/components/Track.svelte';
-	import { MAX_FUTURE_WINDOW, MAX_PAST_WINDOW } from '$lib/dates';
 	import { generatePKCE, storeCodeVerifier } from '$lib/pkce';
 	import { spotifyApi } from '$lib/spotify-api';
 	import { onMount } from 'svelte';
 
-	let { data } = $props();
+	let { data, headerText } = $props();
 
 	let spotifyToken = $state(null);
 	let spotifyTokenExpiry = $state(null);
@@ -162,17 +162,13 @@
 
 <main class="mx-auto max-w-3xl px-4 pb-8">
 	<!-- Header -->
-	<div class="my-6 rounded-lg border border-green-300 bg-green-50 p-6">
-		<h3 class="text-xl font-semibold">📒 svelte pco x spotify ✨</h3>
-		<p class="mt-2 text-sm text-gray-600">
-			These are songs in "active" rotation that have been scheduled since
-			{MAX_PAST_WINDOW.toLocaleDateString()} and up to {MAX_FUTURE_WINDOW.toLocaleDateString()}. Use
-			the checkboxes to include them in the list that'll be generated in Spotify, or uncheck them
-			and find a different recording as necessary :)
-		</p>
+	<div class="my-6 flex flex-col gap-y-4 rounded-lg border border-green-300 bg-green-50 p-6">
+		{#if headerText}
+			{@render headerText()}
+		{/if}
 
 		{#if isTokenValid && spotifyUser}
-			<div class="mt-4 flex items-center justify-between">
+			<div class="flex items-center justify-between">
 				<p class="text-sm text-green-700">✅ Logged in to Spotify</p>
 				<button
 					onclick={() => (playlist = createPlaylist())}
@@ -195,7 +191,7 @@
 				{/await}
 			{/if}
 		{:else}
-			<p class="mt-4">
+			<p>
 				<button
 					onclick={loginToSpotify}
 					class="inline-block rounded bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
@@ -215,7 +211,7 @@
 
 	<!-- Loading spinner for Spotify data -->
 	{#if loading}
-		<p class="py-8 text-center text-gray-500">Matching songs on Spotify...</p>
+		<Spinner>Matching songs on Spotify...</Spinner>
 	{/if}
 
 	<!-- Song list -->
