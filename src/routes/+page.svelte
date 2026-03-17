@@ -1,300 +1,83 @@
 <script>
-	import { batchAsync } from '$lib/batch-async';
-	import PcoDescription from '$lib/components/PcoDescription.svelte';
-	import Track from '$lib/components/Track.svelte';
-	import { MAX_PAST_WINDOW } from '$lib/dates';
-	import { generatePKCE, storeCodeVerifier } from '$lib/pkce';
-	import { spotifyApi } from '$lib/spotify-api';
-	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 
-	/** @type {{ data: import('./$types').PageData }} */
-	let { data } = $props();
+	let input = $state('');
+	let error = $state('');
 
-	let spotifyToken = $state(null);
-	let spotifyTokenExpiry = $state(null);
-	let spotifyUser = $state(null);
-	let spotifyTracks = $state([]);
-	let selected = $state([]);
-	let loading = $state(false);
-	let error = $state(null);
-	let playlist = $state(null);
-	let playlistLoading = $state(false);
-	let searchResults = $state({});
+	function navigate(e) {
+		e.preventDefault();
+		error = '';
 
-	const isTokenValid = $derived(
-		!!spotifyToken && !!spotifyTokenExpiry && spotifyTokenExpiry > Date.now()
-	);
-
-	async function loginToSpotify() {
-		const { codeVerifier, codeChallenge } = await generatePKCE();
-		storeCodeVerifier(codeVerifier);
-
-		const host = window.location.host.includes('localhost') ? '127.0.0.1' : window.location.host;
-		const params = new URLSearchParams({
-			client_id: import.meta.env.VITE_SPOTIFY_CLIENT_ID,
-			response_type: 'code',
-			redirect_uri: `${window.location.protocol}//${host}/callback`,
-			scope: 'playlist-modify-public',
-			code_challenge_method: 'S256',
-			code_challenge: codeChallenge,
-			state: '123'
-		});
-
-		window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
-	}
-
-	onMount(async () => {
-		spotifyToken = localStorage.getItem('spotifyToken');
-		spotifyTokenExpiry = Number(localStorage.getItem('spotifyTokenExpiry') ?? 0);
-
-		if (spotifyToken && isTokenValid) {
-			await loadSpotifyData();
-		}
-	});
-
-	async function loadSpotifyData() {
-		loading = true;
-		error = null;
-		try {
-			spotifyApi.setAccessToken(spotifyToken);
-			spotifyUser = await spotifyApi.getMe();
-
-			const results = await batchAsync(data.songs, (song) =>
-				spotifyApi
-					.searchTracks(song.spotifyQuery, { limit: 1 })
-					.catch(() => ({ tracks: { items: [] } }))
-			);
-
-			spotifyTracks = results.map(({ tracks }) => {
-				if (tracks.items?.length) {
-					const { external_urls, album, artists, ...rest } = tracks.items[0];
-					return {
-						...rest,
-						external_urls,
-						url: external_urls.spotify,
-						artists,
-						artist: artists[0].name,
-						album,
-						albumImg: album.images[1]
-					};
-				}
-				return null;
-			});
-
-			selected = spotifyTracks.map((track) => track?.uri).filter(Boolean);
-		} catch (err) {
-			console.error(err);
-			error = err.message || err.responseText || JSON.stringify(err, null, 2);
-		} finally {
-			loading = false;
-		}
-	}
-
-	async function createPlaylist() {
-		if (!spotifyUser || !isTokenValid) {
-			error = 'Unable to create playlist';
+		const value = input.trim();
+		if (!value) {
+			error = 'Please enter a plan ID or URL.';
 			return;
 		}
 
-		playlistLoading = true;
-		error = null;
-		try {
-			const { id, externalUrl } = await spotifyApi.createPlaylist(
-				'Active Songs',
-				`auto generated from the last ~${selected.length} scheduled songs on PCO`
-			);
-			const validUris = selected.filter(
-				(uri) => typeof uri === 'string' && uri.includes('spotify:track:')
-			);
-			if (validUris.length) {
-				await spotifyApi.addTracksToPlaylist(id, validUris);
-			}
-			return externalUrl;
-		} catch (err) {
-			error = err.message;
-		} finally {
-			playlistLoading = false;
-		}
-	}
-
-	function toggleTrack(uri, checked) {
-		if (checked) {
-			if (!selected.includes(uri)) {
-				selected = [...selected, uri];
-			}
-		} else {
-			selected = selected.filter((u) => u !== uri);
-		}
-	}
-
-	function removeSpotifyTrack(index) {
-		const uri = spotifyTracks[index]?.uri;
-		spotifyTracks[index] = null;
-		if (uri) {
-			selected = selected.filter((u) => u !== uri);
-		}
-	}
-
-	/** @type {Record<string, ReturnType<typeof setTimeout>>} */
-	let searchTimeouts = {};
-
-	function findNewRecordings(query, songId) {
-		if (searchTimeouts[songId]) {
-			clearTimeout(searchTimeouts[songId]);
-		}
-		if (query.trim() === '') {
-			searchResults = { ...searchResults, [songId]: null };
+		// Accept a raw numeric ID
+		if (/^\d+$/.test(value)) {
+			goto(`/plans/${value}`);
 			return;
 		}
-		searchTimeouts[songId] = setTimeout(async () => {
-			try {
-				const results = await spotifyApi.searchTracks(query, {
-					limit: 5
-				});
-				searchResults = {
-					...searchResults,
-					[songId]: results.tracks.items
-				};
-			} catch {
-				searchResults = { ...searchResults, [songId]: null };
-			}
-		}, 250);
+
+		// Accept a full PCO URL like https://services.planningcenteronline.com/plans/123456
+		// or https://services.planningcenteronline.com/service_types/456/plans/123456
+		const match = value.match(/plans\/(\d+)/);
+		if (match) {
+			goto(`/plans/${match[1]}`);
+			return;
+		}
+
+		error = 'Could not find a plan ID. Paste a PCO plan URL or enter the numeric ID directly.';
 	}
 </script>
 
-<main class="mx-auto max-w-3xl px-4 pb-8">
-	<!-- Header -->
-	<div class="my-6 rounded-lg border border-green-300 bg-green-50 p-6">
-		<h3 class="text-xl font-semibold">📒 svelte pco x spotify ✨</h3>
+<main class="mx-auto flex min-h-[80vh] max-w-xl flex-col items-center justify-center px-4">
+	<div class="w-full rounded-lg border border-green-300 bg-green-50 p-8 shadow-sm">
+		<h1 class="text-2xl font-bold text-gray-800">📒 pco × spotify ✨</h1>
 		<p class="mt-2 text-sm text-gray-600">
-			These are songs in "active" rotation that have been scheduled since
-			{MAX_PAST_WINDOW.toLocaleDateString()}. Use the checkboxes to include them in the list that'll
-			be generated in Spotify, or uncheck them and find a different recording as necessary :)
+			Generate a Spotify playlist from a Planning Center plan or browse all active songs.
 		</p>
 
-		{#if isTokenValid && spotifyUser}
-			<div class="mt-4 flex items-center justify-between">
-				<p class="text-sm text-green-700">✅ Logged in to Spotify</p>
+		<div class="mt-6">
+			<a
+				href="/all"
+				class="inline-block rounded bg-green-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-green-700"
+			>
+				Browse all active songs →
+			</a>
+		</div>
+
+		<hr class="my-6 border-gray-200" />
+
+		<form onsubmit={navigate} class="space-y-3">
+			<label for="plan-input" class="block text-sm font-medium text-gray-700">
+				Go to a specific plan
+			</label>
+			<div class="flex gap-2">
+				<input
+					id="plan-input"
+					type="text"
+					bind:value={input}
+					placeholder="Plan ID or PCO URL"
+					class="block w-full rounded border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
+				/>
 				<button
-					onclick={() => (playlist = createPlaylist())}
-					disabled={playlistLoading || loading}
-					class="rounded bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+					type="submit"
+					class="shrink-0 rounded bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-green-700"
 				>
-					{playlistLoading ? 'Creating...' : 'Make the playlist!'}
+					Go
 				</button>
 			</div>
-			{#if playlist}
-				{#await playlist then url}
-					<a
-						href={url}
-						target="_blank"
-						rel="noreferrer noopener"
-						class="mt-2 block text-lg text-green-700 underline hover:text-green-900"
-					>
-						Here is your playlist!
-					</a>
-				{/await}
-			{/if}
-		{:else}
-			<p class="mt-4">
-				<button
-					onclick={loginToSpotify}
-					class="inline-block rounded bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+			<p class="text-xs text-gray-500">
+				e.g. <code class="rounded bg-gray-100 px-1 py-0.5">12345678</code> or
+				<code class="rounded bg-gray-100 px-1 py-0.5"
+					>https://services.planningcenteronline.com/plans/12345678</code
 				>
-					Log in to Spotify
-				</button>
 			</p>
-		{/if}
+			{#if error}
+				<p class="text-sm text-red-600">{error}</p>
+			{/if}
+		</form>
 	</div>
-
-	<!-- Error display -->
-	{#if error}
-		<div class="my-4 rounded border border-red-300 bg-red-50 p-4 text-sm text-red-700">
-			{error}
-		</div>
-	{/if}
-
-	<!-- Loading spinner for Spotify data -->
-	{#if loading}
-		<p class="py-8 text-center text-gray-500">Matching songs on Spotify...</p>
-	{/if}
-
-	<!-- Song list -->
-	{#if data.songs.length}
-		<ul class="space-y-4">
-			{#each data.songs as song, index (song.id)}
-				<li class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-					{#if spotifyTracks[index]}
-						<div class="flex items-start justify-between gap-4">
-							<Track item={{ ...song, ...spotifyTracks[index] }}>
-								{#snippet pcoDescription()}
-									<span class="text-xs text-gray-500">
-										PCO data:
-										<PcoDescription {song} />
-									</span>
-								{/snippet}
-							</Track>
-							<input
-								type="checkbox"
-								checked={selected.includes(spotifyTracks[index].uri)}
-								onchange={(e) => {
-									if (!e.target.checked) {
-										removeSpotifyTrack(index);
-									} else {
-										toggleTrack(spotifyTracks[index].uri, true);
-									}
-								}}
-								class="mt-1 h-5 w-5 shrink-0 accent-green-600"
-							/>
-						</div>
-					{:else if isTokenValid && !loading}
-						<div class="space-y-3">
-							<div>
-								<PcoDescription {song} />
-							</div>
-							<label class="block text-sm text-gray-500">
-								Search Spotify for
-								<span class="font-medium text-gray-700">{song.title}</span>
-								by
-								<span class="font-medium text-gray-700">{song.author}</span>:
-								<input
-									type="search"
-									placeholder="Search Spotify..."
-									oninput={(e) => findNewRecordings(e.target.value, song.id)}
-									class="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
-								/>
-							</label>
-							{#if searchResults[song.id]}
-								<div class="space-y-2 pl-2">
-									{#each searchResults[song.id] as alternate}
-										<div class="flex items-start gap-2">
-											<input
-												type="checkbox"
-												checked={selected.includes(alternate.uri)}
-												onchange={(e) => toggleTrack(alternate.uri, e.target.checked)}
-												class="mt-1 h-5 w-5 shrink-0 accent-green-600"
-											/>
-											<Track
-												item={{
-													...song,
-													...alternate,
-													url: alternate.external_urls.spotify,
-													artist: alternate.artists[0].name,
-													albumImg: alternate.album.images?.[2] ?? null
-												}}
-											/>
-										</div>
-									{/each}
-								</div>
-							{/if}
-						</div>
-					{:else}
-						<PcoDescription {song} />
-					{/if}
-				</li>
-			{/each}
-		</ul>
-	{:else}
-		<p class="py-8 text-center text-gray-500">No active songs found.</p>
-	{/if}
 </main>

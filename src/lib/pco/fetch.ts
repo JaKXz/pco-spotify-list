@@ -11,8 +11,9 @@ export async function pcoFetch<T extends ResourceObjectOrObjects>(
 	return api.get(endpoint, { searchParams, ...options }).json<JasonApiResponse<T>>();
 }
 
+const prefixUrl = 'https://api.planningcenteronline.com/services/v2';
 const api = ky.create({
-	prefixUrl: 'https://api.planningcenteronline.com/services/v2',
+	prefixUrl,
 	timeout: 30_000,
 	retry: {
 		limit: 3,

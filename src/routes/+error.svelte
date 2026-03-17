@@ -43,7 +43,7 @@
 
 		<p class="mt-2 text-lg text-gray-600">
 			{#if $page.status === 404}
-				We couldn't find the page you're looking for.
+				{$page.error?.message || `We couldn't find the page you're looking for.`}
 			{:else if $page.error?.message}
 				{$page.error.message}
 			{:else}
