@@ -5,6 +5,7 @@
 	import Track from '$lib/components/Track.svelte';
 	import { generatePKCE, storeCodeVerifier } from '$lib/pkce';
 	import { spotifyApi } from '$lib/spotify-api';
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 
 	let {
@@ -41,7 +42,7 @@
 			code_challenge: codeChallenge,
 			state: '123'
 		});
-
+		localStorage.setItem('returnPath', page.url.pathname);
 		window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
 	}
 

@@ -53,7 +53,14 @@
 			localStorage.setItem('spotifyToken', access_token);
 			localStorage.setItem('spotifyTokenExpiry', String(expires_in * 1000 + Date.now()));
 
-			goto('/');
+			const returnPath = localStorage.getItem('returnPath');
+
+			if (returnPath) {
+				localStorage.removeItem('returnPath');
+				goto(returnPath);
+			} else {
+				goto('/');
+			}
 		} catch (err) {
 			error = err.message;
 		}
