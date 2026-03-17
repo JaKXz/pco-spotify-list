@@ -1,5 +1,5 @@
 {
-	"name": "pco-spotify-list",
+	"name": "pco-playlists",
 	"version": "2.0.0",
 	"engines": {
 		"node": ">=24",
