@@ -34,7 +34,6 @@
 
 <main class="mx-auto flex min-h-[80vh] max-w-xl flex-col items-center justify-center px-4">
 	<div class="w-full rounded-lg border border-green-300 bg-green-50 p-8 shadow-sm">
-		<h1 class="text-2xl font-bold text-gray-800">📒 pco × spotify ✨</h1>
 		<p class="mt-2 text-sm text-gray-600">
 			Generate a Spotify playlist from a Planning Center plan or browse all active songs.
 		</p>
