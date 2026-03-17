@@ -121,6 +121,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	return {
 		songs,
 		plan: {
+			...plan,
 			id: plan.id,
 			title: plan.attributes.title ?? plan.attributes.dates,
 			dates: plan.attributes.dates,

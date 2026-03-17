@@ -41,5 +41,9 @@
 </div>
 
 {#key params.planId}
-	<TrackList {data} />
+	<TrackList {data}>
+		{#snippet emptyText()}
+			No songs in this <a class="underline" href={data.plan.links.html.toString()}>plan</a> (yet).
+		{/snippet}
+	</TrackList>
 {/key}

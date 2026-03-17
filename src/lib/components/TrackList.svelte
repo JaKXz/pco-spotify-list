@@ -7,7 +7,7 @@
 	import { spotifyApi } from '$lib/spotify-api';
 	import { onMount } from 'svelte';
 
-	let { data, headerText } = $props();
+	let { data, headerText = null, emptyText = null } = $props();
 
 	let spotifyToken = $state(null);
 	let spotifyTokenExpiry = $state(null);
@@ -290,6 +290,12 @@
 			{/each}
 		</ul>
 	{:else}
-		<p class="py-8 text-center text-gray-500">No active songs found.</p>
+		<p class="text-center text-gray-500">
+			{#if emptyText}
+				{@render emptyText()}
+			{:else}
+				No active songs found.
+			{/if}
+		</p>
 	{/if}
 </main>
