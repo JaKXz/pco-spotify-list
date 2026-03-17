@@ -15,7 +15,6 @@
 		playlistDescription = null
 	} = $props();
 
-	let spotifyToken = $state(null);
 	let spotifyTokenExpiry = $state(null);
 	let spotifyUser = $state(null);
 	let spotifyTracks = $state([]);
@@ -26,9 +25,7 @@
 	let playlistLoading = $state(false);
 	let searchResults = $state({});
 
-	const isTokenValid = $derived(
-		!!spotifyToken && !!spotifyTokenExpiry && spotifyTokenExpiry > Date.now()
-	);
+	const isTokenValid = $derived(!!spotifyTokenExpiry && spotifyTokenExpiry > Date.now());
 
 	async function loginToSpotify() {
 		const { codeVerifier, codeChallenge } = await generatePKCE();
@@ -49,10 +46,9 @@
 	}
 
 	onMount(async () => {
-		spotifyToken = localStorage.getItem('spotifyToken');
 		spotifyTokenExpiry = Number(localStorage.getItem('spotifyTokenExpiry') ?? 0);
 
-		if (spotifyToken && isTokenValid) {
+		if (isTokenValid) {
 			await loadSpotifyData();
 		}
 	});
