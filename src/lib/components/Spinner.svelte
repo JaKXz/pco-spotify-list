@@ -1,5 +1,5 @@
 <script>
-	let { children } = $props();
+	let { children = null } = $props();
 </script>
 
 <div
