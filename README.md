@@ -96,19 +96,28 @@ src/
 ├── routes/
 │   ├── +layout.svelte               # Root layout
 │   ├── +error.svelte                # Error page with app-data reset
-│   ├── +page.server.ts              # Server load
-│   ├── +page.svelte                 # Main page — Spotify matching + UI
+│   ├── +page.svelte                 # Landing page — plan input & nav to /all
+│   ├── all/
+│   │   ├── +page.server.ts          # Server load — fetches all active PCO songs
+│   │   └── +page.svelte             # All active songs view with TrackList
+│   ├── plans/
+│   │   └── [planId]/
+│   │       ├── +page.server.ts      # Server load — fetches a single plan's songs
+│   │       └── +page.svelte         # Single plan view with prev/next navigation
 │   └── callback/
 │       └── +page.svelte             # Spotify OAuth callback handler
 ├── lib/
 │   ├── components/
 │   │   ├── Track.svelte             # Spotify track display card
-│   │   └── PcoDescription.svelte    # PCO song metadata display
+│   │   ├── TrackList.svelte         # Spotify search, selection & playlist creation
+│   │   ├── PcoDescription.svelte    # PCO song metadata display
+│   │   └── Spinner.svelte           # Loading spinner indicator
 │   ├── pco/
-│   │   ├── fetch.ts                 # PCO API client with in-memory TTL cache
-│   │   └── songs.ts                 # Fetches & filters active songs from PCO
+│   │   ├── fetch.ts                 # PCO API client with retry & in-memory TTL cache
+│   │   └── songs.ts                 # Fetches, dedupes & enriches active songs from PCO
 │   ├── artist-mapping.ts            # PCO author → Spotify artist mapping
-│   ├── dates.ts                     # Date helpers
-│   ├── pkce.ts                      # PKCE utilities for Spotify OAuth
-│   └── spotify-api.ts               # Spotify Web API client
+│   ├── batch-async.ts               # Concurrency-limited async batch processor
+│   ├── dates.ts                     # Rolling date-window constants
+│   ├── pkce.ts                      # PKCE code verifier/challenge for Spotify OAuth
+│   └── spotify-api.ts               # Spotify Web API client (search, playlist, etc.)
 ```

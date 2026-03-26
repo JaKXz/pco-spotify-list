@@ -28,7 +28,8 @@
 			return;
 		}
 
-		error = 'Could not find a plan ID. Paste a PCO plan URL or enter the numeric ID directly.';
+		error =
+			'Could not find a [valid] plan ID. Paste a PCO plan URL or enter the numeric ID directly.';
 	}
 </script>
 
