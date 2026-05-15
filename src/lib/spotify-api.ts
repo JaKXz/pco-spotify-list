@@ -1,3 +1,4 @@
+/// <reference types="@types/spotify-api" />
 import ky from 'ky';
 
 const api = ky.create({
