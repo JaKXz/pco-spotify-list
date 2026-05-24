@@ -13,17 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Install Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 'lts/*'
-
-      - uses: pnpm/action-setup@v5
-        name: Install pnpm
-        id: pnpm-install
-        with:
-          version: 10
-          run_install: false
+      - uses: jdx/mise-action@v4
 
       - name: Get pnpm store directory
         id: pnpm-cache
