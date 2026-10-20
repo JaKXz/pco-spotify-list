@@ -4,11 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-patchedDependencies:
-  ts-json-api@1.2.0:
-    hash: 4fc655bd5127544af07b8b91892a36450b102f9bde695289b643b9bef0b3b80a
-    path: patches/ts-json-api@1.2.0.patch
-
 importers:
 
   .:
@@ -57,7 +52,7 @@ importers:
         version: 4.3.0
       ts-json-api:
         specifier: ^1.2.0
-        version: 1.2.0(patch_hash=4fc655bd5127544af07b8b91892a36450b102f9bde695289b643b9bef0b3b80a)
+        version: 1.2.0
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -549,8 +544,8 @@ packages:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
 
-  devalue@5.8.1:
-    resolution: {integrity: sha512-4CXDYRBGqN+57wVJkuXBYmpAVUSg3L6JAQa/DFqm238G73E1wuyc/JhGQJzN7vUf/CMphYau2zXbfWzDR5aTEw==}
+  devalue@5.9.4:
+    resolution: {integrity: sha512-sPAT4pztbu6586/hrhOnMKS17IJrvg12mXiSPSS3W5qDeN2RGgvZ0diZCm31dBbnevfVmujNO3IM2wrS4Y2Rhg==}
 
   enhanced-resolve@5.21.5:
     resolution: {integrity: sha512-mLCNbrQli11K1ySUmuNt4ZUB3OpGIDq4q2vTBTf5cL2lpsRjI9QKqSD0ndjW8FyvcW/Jj46gMe9syyHAsvMa/A==}
@@ -1108,7 +1103,7 @@ snapshots:
       '@types/cookie': 0.6.0
       acorn: 8.16.0
       cookie: 0.6.0
-      devalue: 5.8.1
+      devalue: 5.9.4
       esm-env: 1.2.2
       kleur: 4.1.5
       magic-string: 0.30.21
@@ -1234,7 +1229,7 @@ snapshots:
 
   detect-libc@2.1.2: {}
 
-  devalue@5.8.1: {}
+  devalue@5.9.4: {}
 
   enhanced-resolve@5.21.5:
     dependencies:
@@ -1445,7 +1440,7 @@ snapshots:
       aria-query: 5.3.1
       axobject-query: 4.1.0
       clsx: 2.1.1
-      devalue: 5.8.1
+      devalue: 5.9.4
       esm-env: 1.2.2
       esrap: 2.2.9(@typescript-eslint/types@8.59.4)
       is-reference: 3.0.3
@@ -1466,7 +1461,7 @@ snapshots:
 
   totalist@3.0.1: {}
 
-  ts-json-api@1.2.0(patch_hash=4fc655bd5127544af07b8b91892a36450b102f9bde695289b643b9bef0b3b80a):
+  ts-json-api@1.2.0:
     dependencies:
       ramda: 0.26.1
 
